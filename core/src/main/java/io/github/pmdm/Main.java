@@ -15,6 +15,8 @@ public class Main extends ApplicationAdapter {
 
     Mob esqueleto;
 
+    Personaje prota;
+
 
     @Override
     public void create() {
@@ -22,6 +24,7 @@ public class Main extends ApplicationAdapter {
         background = new Texture(Gdx.files.internal("NonParallax.png"));
         esqueleto = new Mob(100,100,"SkeletonWalk.png", 13);
         esqueleto.setVelocity(50,0);
+        prota=new Personaje("bucket.png");
         //image = new Texture("libgdx.png");
     }
 
@@ -33,6 +36,7 @@ public class Main extends ApplicationAdapter {
         batch.begin();
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         esqueleto.draw(batch);
+        prota.draw(batch);
         batch.end();
     }
 
