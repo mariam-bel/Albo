@@ -2,6 +2,7 @@ package io.github.pmdm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,32 +13,37 @@ public class Personaje{
 
     Sprite protaSprite;
 
-    Vector2 velocidad=new Vector2();
-    float vel=500;
+    Vector2 position=new Vector2();
+
+    boolean movimientoIzquierda=false;
+    boolean movimientoDerecha=false;
     public Personaje(String imagen, float inicioX, float inicioY){
         protaImg=new Texture(imagen);
         protaSprite=new Sprite(protaImg);
+        position.set(inicioX,inicioY);
         protaSprite.setPosition(inicioX,inicioY);
+
     }
+
 
     public void update(float delta){
-        velocidad.setZero();
+        float velocidad = 300;
 
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            velocidad.x=-1;
-        } if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            velocidad.x =1;
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            position.x -= velocidad * delta;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            position.x += velocidad * delta;
         }
 
-        velocidad.nor().scl(vel * delta);
-        protaSprite.translate(velocidad.x,velocidad.y);
+        position.x = Math.max(0, Math.min(position.x,
+            Gdx.graphics.getWidth() - protaSprite.getWidth()));
+        position.y = Math.max(0, Math.min(position.y,
+            Gdx.graphics.getHeight() - protaSprite.getHeight()));
 
-
-        float x=Math.max(0, Math.min(protaSprite.getX(), Gdx.graphics.getWidth() - protaSprite.getWidth()));
-        float y=Math.max(0, Math.min(protaSprite.getY(), Gdx.graphics.getHeight()- protaSprite.getHeight()));
-
-        protaSprite.setPosition(x,y);
+        protaSprite.setPosition(position.x, position.y);
     }
+
     public void draw(SpriteBatch batch) {
         protaSprite.draw(batch);
 

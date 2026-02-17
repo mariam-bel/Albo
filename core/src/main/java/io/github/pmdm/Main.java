@@ -18,6 +18,7 @@ public class Main extends ApplicationAdapter {
     Personaje prota;
 
 
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -25,12 +26,14 @@ public class Main extends ApplicationAdapter {
         esqueleto = new Mob(100,100,"SkeletonWalk.png", 13);
         esqueleto.setVelocity(50,0);
         prota=new Personaje("bucket.png", 100, 100);
+
         //image = new Texture("libgdx.png");
     }
 
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         esqueleto.update(deltaTime);
         prota.update(deltaTime);
