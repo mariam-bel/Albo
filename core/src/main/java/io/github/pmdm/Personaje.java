@@ -12,17 +12,21 @@ public class Personaje{
     Vector2 position=new Vector2();
     Vector2 velocidad = new Vector2();
     Vector2 touchPos;
-    boolean movimientoIzquierda=false;
-    boolean movimientoDerecha=false;
+
+    boolean suelo;
+    float gravedad;
+
     public Personaje(String imagen, float inicioX, float inicioY){
         protaImg=new Texture(imagen);
         protaSprite=new Sprite(protaImg);
         position.set(inicioX,inicioY);
         protaSprite.setPosition(inicioX,inicioY);
         touchPos = new Vector2();
+        suelo=true;
+        gravedad=1000f;
     }
     public void update(float delta){
-        float speed = 1000f;
+        float speed = 500f;
         velocidad.x = 0;
 
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -31,16 +35,23 @@ public class Personaje{
         else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             velocidad.x = -speed;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)&& suelo) {
             velocidad.y = speed;
+            suelo=false;
         }
-
+        if (!suelo){
+            velocidad.y -=gravedad*delta;
+        }
+        if (position.y<=0){
+            suelo=true;
+        }
         if (Gdx.input.isTouched()) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY());
             protaSprite.setCenterX(touchPos.x);
         }
 
         position.x += velocidad.x * delta;
+        position.y += velocidad.y * delta;
         position.x = Math.max(0, Math.min(position.x, Gdx.graphics.getWidth() - protaSprite.getWidth()));
         position.y = Math.max(0, Math.min(position.y, Gdx.graphics.getHeight() - protaSprite.getHeight()));
         protaSprite.setPosition(position.x, position.y);
