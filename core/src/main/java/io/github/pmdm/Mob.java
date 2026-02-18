@@ -52,6 +52,7 @@ public class Mob {
 
     public void draw(SpriteBatch batch) {
         sprite.draw(batch); // Dibujar el sprite en el batch
+        sprite.setSize(160,320);
     }
 
     public void dispose() {

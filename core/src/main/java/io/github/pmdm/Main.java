@@ -5,17 +5,19 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.math.Vector2;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
-    private Texture image;
     private Texture background;
 
     Mob esqueleto;
 
     Personaje prota;
+
+    //Para clickar con ratón
+    Vector2 touchPos;
 
 
 
@@ -26,8 +28,6 @@ public class Main extends ApplicationAdapter {
         esqueleto = new Mob(100,100,"SkeletonWalk.png", 13);
         esqueleto.setVelocity(50,0);
         prota=new Personaje("bucket.png", 100, 100);
-
-        //image = new Texture("libgdx.png");
     }
 
     @Override
@@ -35,8 +35,8 @@ public class Main extends ApplicationAdapter {
         float deltaTime = Gdx.graphics.getDeltaTime();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        esqueleto.update(deltaTime);
         prota.update(deltaTime);
+        esqueleto.update(deltaTime);
         batch.begin();
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         esqueleto.draw(batch);
@@ -50,6 +50,5 @@ public class Main extends ApplicationAdapter {
         background.dispose();
         esqueleto.dispose();
         prota.dispose();
-        //image.dispose();
     }
 }
