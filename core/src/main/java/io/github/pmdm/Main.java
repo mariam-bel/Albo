@@ -6,41 +6,58 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    private SpriteBatch batch;
+    final float deltaTime = Gdx.graphics.getDeltaTime();
+    public static SpriteBatch batch;
     private Texture background;
-
     Mob esqueleto;
-
     Personaje prota;
-
-    //Para clickar con ratón
-    Vector2 touchPos;
-
+    Controllers controllers;
 
 
     @Override
     public void create() {
         batch = new SpriteBatch();
+
         background = new Texture(Gdx.files.internal("NonParallax.png"));
+
         esqueleto = new Mob(100,100,"SkeletonWalk.png", 13);
         esqueleto.setVelocity(50,0);
+
         prota=new Personaje("bucket.png", 100, 100);
+
+        controllers = new Controllers();
+
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        super.resize(width, height);
+
     }
 
     @Override
     public void render() {
-        float deltaTime = Gdx.graphics.getDeltaTime();
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         prota.update(deltaTime);
         esqueleto.update(deltaTime);
+
         batch.begin();
+
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         esqueleto.draw(batch);
         prota.draw(batch);
+
         batch.end();
     }
 
