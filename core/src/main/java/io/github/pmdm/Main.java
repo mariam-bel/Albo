@@ -36,9 +36,9 @@ public class Main extends ApplicationAdapter {
         background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
 
         mobs = new Array<>();
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, -20));
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50));
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 50));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, -20, Mob.Comportamiento.PATRULLA, 600,1000));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
 
 
         prota = new Personaje(100, 1650);
