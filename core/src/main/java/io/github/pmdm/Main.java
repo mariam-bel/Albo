@@ -20,12 +20,12 @@ public class Main extends ApplicationAdapter {
     ShapeRenderer shapeRenderer;
     public static SpriteBatch batch;
     private Texture background;
-    Mob esqueleto;
     Personaje prota;
     Controllers controllers;
     OrthographicCamera camara;
     World world;
     Array<Plataformas> plataformas;
+    Array<Mob> mobs;
     boolean golpeRealizado = false;
 
     @Override
@@ -35,13 +35,15 @@ public class Main extends ApplicationAdapter {
         world = new World(new Vector2(0,-10), true);
         background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
 
-        esqueleto = new Mob(600,100,"SkeletonWalk.png", 13);
-        esqueleto.setVelocity(250,0);
+        mobs = new Array<>();
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, -20));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 50));
 
-        prota=new Personaje(100, 1650);
+
+        prota = new Personaje(100, 1650);
 
         plataformas = new Array<>();
-
         plataformas.add(new Plataformas(400, 20, 60, 120, "plataforma2.png"));
         plataformas.add(new Plataformas(850, 150, 100, 150, "plataforma5.png"));
         plataformas.add(new Plataformas(1600, 300, 60, 100, "plataforma2.png"));
@@ -49,37 +51,35 @@ public class Main extends ApplicationAdapter {
         plataformas.add(new Plataformas(0, 0, 300, 750));
         plataformas.add(new Plataformas(300, 0, 300, 500));
         plataformas.add(new Plataformas(600, 150, 1500, 100));
+        plataformas.add(new Plataformas(0, -20, 20000, 50));
 
         controllers = new Controllers();
-
     }
 
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
-        camara=new OrthographicCamera();
-        camara.setToOrtho(false,1000,480);
+        camara = new OrthographicCamera();
+        camara.setToOrtho(false, 1000, 480);
         controllers.resize(width, height);
     }
 
     public void handleInput() {
-
         Vector2 velocidad = prota.getVelocidad();
 
-        boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.RIGHT);
-        boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.LEFT);
+        boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.D);
+        boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.A);
         boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
         boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.W);
 
         if (avanzar) {
             velocidad.x = 500;
-        }
-        else if (retroceder) {
+        } else if (retroceder) {
             velocidad.x = -500;
-        }
-        else {
+        } else {
             velocidad.x = 0;
         }
+
         if (saltar) {
             prota.jump();
         }
@@ -92,67 +92,73 @@ public class Main extends ApplicationAdapter {
 
     int vidaMob = 1;
     public void checkAttack() {
-        if (prota.isAttacking()) {
-            if (!golpeRealizado && prota.getAttackBox().overlaps(esqueleto.getBounds())) {
-                vidaMob--;
-                golpeRealizado = true;
-                if (vidaMob <= 0) {
-                    esqueleto.setDead(true);
+        for (Mob m: mobs){
+            if (prota.isAttacking()) {
+                if (!golpeRealizado && prota.getAttackBox().overlaps(m.getBounds())) {
+                    vidaMob--;
+                    golpeRealizado = true;
+                    if (vidaMob <= 0) {
+                        m.setDead(true);
+                    }
                 }
+            } else {
+                golpeRealizado = false;
             }
-        } else {
-            golpeRealizado = false;
         }
+
     }
 
     @Override
     public void render() {
-
         float deltaTime = Gdx.graphics.getDeltaTime();
-
         handleInput();
 
-        world.step(1/60f,6,2);
+        world.step(1/60f, 6, 2);
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         Array<Rectangle> colisiones = new Array<>();
-
         for (Plataformas p : plataformas) {
             colisiones.add(p.getBounds());
         }
 
+        for (Mob m: mobs) {
+            m.updateIA(deltaTime, prota.getPosition(), colisiones);
+        }
 
         prota.update(deltaTime, colisiones);
-        if (esqueleto.isAttacking()) {
-            if (esqueleto.getAttackBox().overlaps(prota.getBounds())) {
-                if (!prota.isHurt() && !prota.isDead()) {
-                    prota.quitarVida(1);
 
-                    if (prota.getVidas() <= 0) {
-                        prota.setDead(true);
+        for (Mob m: mobs){
+            if (m.isAttacking()) {
+                if (m.getAttackBox().overlaps(prota.getBounds())) {
+                    if (!prota.isHurt() && !prota.isDead()) {
+                        prota.quitarVida(1);
+                        if (prota.getVidas() <= 0) {
+                            prota.setDead(true);
+                        }
                     }
                 }
             }
         }
+
+
         checkAttack();
 
-
-        camara.position.x +=(prota.getPosition().x -camara.position.x)*0.1f;
-        camara.position.y +=(prota.getPosition().y -camara.position.y)*0.1f;
-        camara.position.x= MathUtils.clamp(prota.getPosition().x,camara.viewportWidth/2, Gdx.graphics.getWidth()-camara.viewportWidth/2);
-        camara.position.y= MathUtils.clamp(prota.getPosition().y,camara.viewportHeight/2, Gdx.graphics.getHeight()-camara.viewportHeight/2);
+        camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
+        camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
+        camara.position.x = MathUtils.clamp(prota.getPosition().x, camara.viewportWidth/2, Gdx.graphics.getWidth() - camara.viewportWidth/2);
+        camara.position.y = MathUtils.clamp(prota.getPosition().y, camara.viewportHeight/2, Gdx.graphics.getHeight() - camara.viewportHeight/2);
         camara.update();
 
         batch.setProjectionMatrix(camara.combined);
         batch.begin();
-
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        if (!esqueleto.shouldRemove()) {
-            esqueleto.update(deltaTime, prota.position);
-            esqueleto.draw(batch);
+
+        for (Mob m: mobs) {
+            m.draw(batch);
         }
+
         prota.draw(batch);
         for (Plataformas p : plataformas) {
             p.draw(batch);
@@ -161,54 +167,37 @@ public class Main extends ApplicationAdapter {
 
         shapeRenderer.setProjectionMatrix(camara.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        shapeRenderer.setColor(0,1,0,1); // plataforma
+        shapeRenderer.setColor(0, 1, 0, 1);
         for (Plataformas p : plataformas) {
-            shapeRenderer.rect(
-                p.getBounds().x,
-                p.getBounds().y,
-                p.getBounds().width,
-                p.getBounds().height
-            );
+            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
         }
+        shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
 
-        shapeRenderer.setColor(0,1,0,1); // personaje
-        shapeRenderer.rect(
-            prota.getBounds().x,
-            prota.getBounds().y,
-            prota.getBounds().width,
-            prota.getBounds().height
-        );
+        shapeRenderer.setColor(1, 0, 0, 1);
+        shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
 
-        shapeRenderer.setColor(1,0,0,1); // ataque
-        shapeRenderer.rect(
-            prota.getAttackBox().x,
-            prota.getAttackBox().y,
-            prota.getAttackBox().width,
-            prota.getAttackBox().height
-        );
-
-        shapeRenderer.setColor(0,0,1,1); // enemigo
-        if (!esqueleto.shouldRemove()) {
-            shapeRenderer.rect(
-                esqueleto.getBounds().x,
-                esqueleto.getBounds().y,
-                esqueleto.getBounds().width,
-                esqueleto.getBounds().height
-            );
+        shapeRenderer.setColor(0, 0, 1, 1);
+        for (Mob m: mobs){
+            if (!m.shouldRemove()) {
+                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+                if(m.isAttacking()) {
+                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
+                }
+            }
         }
         shapeRenderer.end();
+
         controllers.stage.act(deltaTime);
         controllers.draw();
-
     }
 
     @Override
     public void dispose() {
         batch.dispose();
         background.dispose();
-        esqueleto.dispose();
-        prota.dispose();
+        for (Mob m: mobs) {
+            m.dispose();
+        }
         for (Plataformas p : plataformas) {
             p.dispose();
         }
