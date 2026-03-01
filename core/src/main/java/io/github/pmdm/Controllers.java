@@ -27,7 +27,7 @@ public class Controllers {
 
     public Controllers() {
         camera = new OrthographicCamera();
-        viewport = new FitViewport(800,480, camera);
+        viewport = new FitViewport(1000,480, camera);
         stage = new Stage(viewport, Main.batch);
         Gdx.input.setInputProcessor(stage);
 
@@ -39,7 +39,7 @@ public class Controllers {
         tableDerecha.setFillParent(true);
         tableDerecha.right().bottom();
 
-        Image btnSaltar = new Image(new Texture("flecha-arriba.png"));
+        Image btnSaltar = new Image(new Texture("T_S_Down_Alt.png"));
         btnSaltar.setSize(50,50);
 
         btnSaltar.addListener(new InputListener(){
@@ -47,12 +47,12 @@ public class Controllers {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 setSaltar(true);
+                System.out.println("Botón salto touchDown");
                 return true;
             }
-
         });
 
-        Image btnAtacar = new Image(new Texture("flecha-abajo.png"));
+        Image btnAtacar = new Image(new Texture("T_S_Square_Alt.png"));
         btnAtacar.setSize(50,50);
 
         btnAtacar.addListener(new InputListener(){
@@ -69,7 +69,7 @@ public class Controllers {
             }
         });
 
-        Image btnAvanzar = new Image(new Texture("flecha-avanzar.png"));
+        Image btnAvanzar = new Image(new Texture("T_S_Right_Alt.png"));
         btnAvanzar.setSize(50,50);
 
         btnAvanzar.addListener(new InputListener(){
@@ -86,7 +86,7 @@ public class Controllers {
             }
         });
 
-        Image btnRetroceder = new Image(new Texture("flecha-retroceder.png"));
+        Image btnRetroceder = new Image(new Texture("T_S_Left_Alt.png"));
         btnRetroceder.setSize(50,50);
 
         btnRetroceder.addListener(new InputListener(){
@@ -150,7 +150,6 @@ public class Controllers {
         }
         return false;
     }
-
     public void setSaltar(boolean saltar) {
         this.saltar = saltar;
     }
@@ -158,11 +157,9 @@ public class Controllers {
     public void resize(int wisth, int height) {
         viewport.update(wisth, height);
     }
-
     public boolean isAtacar() {
         return atacar;
     }
-
     public void setAtacar(boolean atacar) {
         this.atacar = atacar;
     }
