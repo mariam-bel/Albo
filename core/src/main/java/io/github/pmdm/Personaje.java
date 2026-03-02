@@ -36,8 +36,9 @@ public class Personaje extends Entidad {
     int numSaltos = 2;
 
     private float hurtTimer = 0;
-    private final float HURT_DURATION = FRAME_DURATION * 4;
+    private final float HURT_DURATION = FRAME_DURATION * 8;
     private int vidas = 3;
+    boolean eliminar=false;
 
     public Personaje(float inicioX, float inicioY) {
         super( 10, 0.2f);
@@ -79,7 +80,6 @@ public class Personaje extends Entidad {
         bounds = new Rectangle(inicioX + 30, inicioY, 40, 70);
     }
 
-    // Método auxiliar para no repetir bucles for al crear animaciones
     private Array<TextureRegion> getFrames(TextureRegion[][] regions, int fila, int cantidad) {
         Array<TextureRegion> frames = new Array<>();
         for (int i = 0; i < cantidad; i++) {
@@ -118,98 +118,104 @@ public class Personaje extends Entidad {
 
     public void update(float delta, Array<Rectangle> superficies) {
         stateTime += delta;
-        velocidad.y -= gravedad * delta;
-        position.x += velocidad.x * delta;
-        bounds.setPosition(position.x, position.y);
-
-        for (Rectangle rect : superficies) {
-            if (bounds.overlaps(rect)) {
-                if (velocidad.x > 0) position.x = rect.x - bounds.width;
-                else if (velocidad.x < 0) position.x = rect.x + rect.width;
-                velocidad.x = 0;
-                bounds.setPosition(position.x, position.y);
-            }
-        }
-
-        position.y += velocidad.y * delta;
-        bounds.setPosition(position.x, position.y);
-        suelo = false;
-
-        for (Rectangle rect : superficies) {
-            if (bounds.overlaps(rect)) {
-                if (velocidad.y > 0) {
-                    position.y = rect.y - bounds.height;
-                } else if (velocidad.y < 0) {
-                    position.y = rect.y + rect.height;
-                    suelo = true;
-                    saltos = 0;
-                }
-                velocidad.y = 0;
-                bounds.setPosition(position.x, position.y);
-            }
-        }
-
-        position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth());
-        if (position.y <= 0) {
-            position.y = 0;
-            velocidad.y = 0;
-            suelo = true;
-            saltos = 0;
-        }
-
-        if (velocidad.x > 0) facingRight = true;
-        else if (velocidad.x < 0) facingRight = false;
-
-        if (isAttacking) {
-            attackTimer -= delta;
-            if (attackTimer <= 0) isAttacking = false;
-        }
-        if (isHurt) {
-            hurtTimer -= delta;
-            if (hurtTimer <= 0) isHurt = false;
-        }
-
-        if (isAttacking) {
-            attackBox.set(facingRight ? position.x + protaSprite.getWidth() - 60 : position.x - 60, position.y, 60, 80);
-        } else {
-            attackBox.set(0, 0, 0, 0);
-        }
-
-        estadoAnterior = estadoActual;
         if (!isDead) {
-            if (isAttacking) estadoActual = Estado.ATTACK;
-            else if (Math.abs(velocidad.y) > 1f) estadoActual = Estado.JUMP;
-            else if (Math.abs(velocidad.x) > 5f) estadoActual = Estado.WALK;
-            else if (isHurt) estadoActual = Estado.HURT;
-            else estadoActual = Estado.IDLE;
-        } else {
-            estadoActual = Estado.DEAD;
+            velocidad.y -= gravedad * delta;
+            position.x += velocidad.x * delta;
+            bounds.setPosition(position.x, position.y);
+
+            for (Rectangle rect : superficies) {
+                if (bounds.overlaps(rect)) {
+                    if (velocidad.x > 0) position.x = rect.x - bounds.width;
+                    else if (velocidad.x < 0) position.x = rect.x + rect.width;
+                    velocidad.x = 0;
+                    bounds.setPosition(position.x, position.y);
+                }
+            }
+
+            position.y += velocidad.y * delta;
+            bounds.setPosition(position.x, position.y);
+            suelo = false;
+
+            for (Rectangle rect : superficies) {
+                if (bounds.overlaps(rect)) {
+                    if (velocidad.y > 0) {
+                        position.y = rect.y - bounds.height;
+                    } else if (velocidad.y < 0) {
+                        position.y = rect.y + rect.height;
+                        suelo = true;
+                        saltos = 0;
+                    }
+                    velocidad.y = 0;
+                    bounds.setPosition(position.x, position.y);
+                }
+            }
+
+            position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth());
+            if (position.y <= 0) {
+                position.y = 0;
+                velocidad.y = 0;
+                suelo = true;
+                saltos = 0;
+            }
+
+            if (velocidad.x > 0) facingRight = true;
+            else if (velocidad.x < 0) facingRight = false;
+
+            if (isAttacking) {
+                attackTimer -= delta;
+                if (attackTimer <= 0) isAttacking = false;
+            }
+            if (isHurt) {
+                hurtTimer -= delta;
+                if (hurtTimer <= 0) isHurt = false;
+            }
+
+            if (isAttacking) {
+                attackBox.set(facingRight ? position.x + protaSprite.getWidth() - 60 : position.x - 60, position.y, 60, 80);
+            } else {
+                attackBox.set(0, 0, 0, 0);
+            }
+
+            estadoAnterior = estadoActual;
+            if (!isDead) {
+                if (isAttacking) estadoActual = Estado.ATTACK;
+                else if (Math.abs(velocidad.y) > 1f) estadoActual = Estado.JUMP;
+                else if (Math.abs(velocidad.x) > 5f) estadoActual = Estado.WALK;
+                else if (isHurt) estadoActual = Estado.HURT;
+                else estadoActual = Estado.IDLE;
+            } else {
+                estadoActual = Estado.DEAD;
+            }
+
+            if (estadoActual != estadoAnterior) stateTime = 0;
+
+            TextureRegion currentFrame = switch (estadoActual) {
+                case WALK -> walkAnimation.getKeyFrame(stateTime);
+                case JUMP -> jumpAnimation.getKeyFrame(stateTime);
+                case ATTACK -> attackAnimation.getKeyFrame(stateTime);
+                case HURT -> hurtAnimation.getKeyFrame(stateTime);
+                default -> idleAnimation.getKeyFrame(stateTime);
+            };
+
+            protaSprite.setRegion(currentFrame);
+            protaSprite.setFlip(!facingRight, false);
+
+            if (!facingRight) protaSprite.setPosition(position.x - 25, position.y - 15);
+            else protaSprite.setPosition(position.x - 35, position.y - 15);
+            float hitboxOffsetY = 0;
+
+            if (estadoActual == Estado.JUMP) {
+                hitboxOffsetY = 10f;
+            }
+
+            bounds.setPosition(position.x, position.y + hitboxOffsetY);
+            hurtBox.setPosition(position.x, position.y + hitboxOffsetY);
+        }else {
+            protaSprite.setRegion(deadAnimation.getKeyFrame(stateTime));
+            if (deadAnimation.isAnimationFinished(stateTime)) {
+                eliminar = true;
+            }
         }
-
-        if (estadoActual != estadoAnterior) stateTime = 0;
-
-        TextureRegion currentFrame = switch (estadoActual) {
-            case WALK -> walkAnimation.getKeyFrame(stateTime);
-            case JUMP -> jumpAnimation.getKeyFrame(stateTime);
-            case ATTACK -> attackAnimation.getKeyFrame(stateTime);
-            case HURT -> hurtAnimation.getKeyFrame(stateTime);
-            case DEAD -> deadAnimation.getKeyFrame(stateTime);
-            default -> idleAnimation.getKeyFrame(stateTime);
-        };
-
-        protaSprite.setRegion(currentFrame);
-        protaSprite.setFlip(!facingRight, false);
-
-        if (!facingRight) protaSprite.setPosition(position.x - 25, position.y - 15);
-        else protaSprite.setPosition(position.x - 35, position.y - 15);
-        float hitboxOffsetY = 0;
-
-        if (estadoActual == Estado.JUMP) {
-            hitboxOffsetY = 10f;
-        }
-
-        bounds.setPosition(position.x, position.y + hitboxOffsetY);
-        hurtBox.setPosition(position.x, position.y + hitboxOffsetY);
     }
 
     @Override
@@ -237,5 +243,14 @@ public class Personaje extends Entidad {
     public boolean isAttacking() { return isAttacking; }
     public boolean isHurt() { return isHurt; }
     public boolean isDead() { return isDead; }
-    public void setDead(boolean dead) { this.isDead = dead; }
+    public void setDead(boolean dead) {
+        if (!this.isDead && dead) {
+            this.isDead = true;
+            this.stateTime = 0;
+            this.velocidad.set(0, 0);
+        }
+    }
+    public boolean shouldRemove() {
+        return eliminar;
+    }
 }

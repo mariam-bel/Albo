@@ -44,7 +44,7 @@ public class Main extends ApplicationAdapter {
         prota = new Personaje(100, 1650);
 
         plataformas = new Array<>();
-        plataformas.add(new Plataformas(2300, 20, 60, 120, "plataforma2.png"));
+        plataformas.add(new Plataformas(2100, 110, 60, 120, "plataforma2.png"));
         plataformas.add(new Plataformas(1600, 300, 60, 100, "plataforma2.png"));
         plataformas.add(new Plataformas(0, 0, 300, 740));
         plataformas.add(new Plataformas(300, 200, 280, 300));
@@ -136,6 +136,9 @@ public class Main extends ApplicationAdapter {
                             prota.setDead(true);
                         }
                     }
+                    if (prota.isHurt()) {
+                        prota.quitarVida(0);
+                    }
                 }
             }
         }
@@ -156,8 +159,9 @@ public class Main extends ApplicationAdapter {
         for (Mob m: mobs) {
             m.draw(batch);
         }
-
-        prota.draw(batch);
+        if (!prota.shouldRemove()) {
+            prota.draw(batch);
+        }
         for (Plataformas p : plataformas) {
             p.draw(batch);
         }
@@ -169,11 +173,12 @@ public class Main extends ApplicationAdapter {
         for (Plataformas p : plataformas) {
             shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
         }
-        shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
+        if (!prota.shouldRemove()) {
+            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
 
-        shapeRenderer.setColor(1, 0, 0, 1);
-        shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
-
+            shapeRenderer.setColor(1, 0, 0, 1);
+            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+        }
         shapeRenderer.setColor(0, 0, 1, 1);
         for (Mob m: mobs){
             if (!m.shouldRemove()) {

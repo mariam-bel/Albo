@@ -26,6 +26,10 @@ public class Mob extends Entidad {
     private float velocidad = 120f;
     private Vector2 velocityV = new Vector2();
 
+    private Rectangle attackArea = new Rectangle();
+    private float attackRangeX = 100;
+    private float attackRangeY = 60;
+
     public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead) {
         super(x, y);
         this.sheet = new Texture(path);
@@ -66,16 +70,18 @@ public class Mob extends Entidad {
         }
 
         stateTime += delta;
-        float dist = position.dst(posProtagonista);
-
         if (!isAttacking) {
             if (comportamiento == Comportamiento.PERSECUCION) {
-                if (posProtagonista.x > position.x) {
-                    velocityV.x = velocidad;
-                    facingRight = true;
+                if (Math.abs(posProtagonista.x - position.x) > 5f) {
+                    if (posProtagonista.x > position.x) {
+                        velocityV.x = velocidad;
+                        facingRight = true;
+                    } else {
+                        velocityV.x = -velocidad;
+                        facingRight = false;
+                    }
                 } else {
-                    velocityV.x = -velocidad;
-                    facingRight = false;
+                    velocityV.x = 0;
                 }
             } else {
                 if (facingRight) {
@@ -86,10 +92,19 @@ public class Mob extends Entidad {
                     if (position.x <= minX) facingRight = true;
                 }
             }
-            estadoActual = Estado.WALK;
+            if (velocityV.x != 0) {
+                estadoActual = Estado.WALK;
+            } else {
+                estadoActual = Estado.IDLE;
+            }
         }
-
-        if (dist < 80f && !isAttacking) {
+        Rectangle playerRect = new Rectangle(posProtagonista.x, posProtagonista.y, 50, 100); // ajusta tamaño del jugador
+        if(facingRight){
+            attackArea.set(position.x + 50, position.y+50, attackRangeX, attackRangeY);
+        } else {
+            attackArea.set(position.x+150 - attackRangeX, position.y+50, attackRangeX, attackRangeY);
+        }
+        if (!isAttacking&& attackArea.overlaps(playerRect)) {
             isAttacking = true;
             stateTime = 0;
             velocityV.x = 0;
@@ -97,7 +112,7 @@ public class Mob extends Entidad {
 
         if (isAttacking) {
             estadoActual = Estado.ATTACK;
-            attackBox.set(facingRight ? position.x + 100 : position.x - 20, position.y + 20, 60, 60);
+            attackBox.set(attackArea);
             if (animations.get("ATTACK").isAnimationFinished(stateTime)) {
                 isAttacking = false;
             }
