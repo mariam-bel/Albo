@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Personaje extends Entidad {
-    private Animation<TextureRegion> walkAnimation, jumpAnimation, attackAnimation, idleAnimation, hurtAnimation, deadAnimation;
+    private Animation<TextureRegion> walkAnimation, jumpAnimation, attackAnimation, attack2Animation, idleAnimation, hurtAnimation, deadAnimation;
     private Texture protaImg;
     private Sprite protaSprite;
     public Vector2 position, velocidad;
@@ -57,17 +57,19 @@ public class Personaje extends Entidad {
         TextureRegion[][] regions = TextureRegion.split(protaImg, frameWidth, frameHeight);
 
         // IDLE (fila 0)
-        idleAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 0, 6), Animation.PlayMode.LOOP);
+        idleAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 0, 0,6), Animation.PlayMode.LOOP);
         // WALK (fila 1)
-        walkAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 1, 8), Animation.PlayMode.LOOP);
+        walkAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 1, 1,8), Animation.PlayMode.LOOP);
         // JUMP (fila 4)
-        jumpAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 4, 6), Animation.PlayMode.NORMAL);
+        jumpAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 4, 4,6), Animation.PlayMode.NORMAL);
         // ATTACK (fila 3)
-        attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 3, 7), Animation.PlayMode.NORMAL);
+        //attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 3, 3,7), Animation.PlayMode.NORMAL);
+       // ATTACK 2 (filas 9 y 10)
+        attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 9, 10,10), Animation.PlayMode.NORMAL);
         // HURT (fila 7)
-        hurtAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 7, 4), Animation.PlayMode.NORMAL);
+        hurtAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 7,7, 4), Animation.PlayMode.NORMAL);
         // DEAD (fila 6)
-        deadAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 6, 10), Animation.PlayMode.NORMAL);
+        deadAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 6, 6,10), Animation.PlayMode.NORMAL);
 
         protaSprite = new Sprite(regions[0][0]);
         protaSprite.setSize(100, 100);
@@ -80,11 +82,16 @@ public class Personaje extends Entidad {
         bounds = new Rectangle(inicioX + 30, inicioY, 40, 70);
     }
 
-    private Array<TextureRegion> getFrames(TextureRegion[][] regions, int fila, int cantidad) {
+    private Array<TextureRegion> getFrames(TextureRegion[][] regions, int filaInicio, int filaFin,int columnasPorFila) {
+
         Array<TextureRegion> frames = new Array<>();
-        for (int i = 0; i < cantidad; i++) {
-            frames.add(regions[fila][i]);
+
+        for (int fila = filaInicio; fila <= filaFin; fila++) {
+            for (int col = 0; col < columnasPorFila; col++) {
+                frames.add(regions[fila][col]);
+            }
         }
+
         return frames;
     }
 
@@ -101,7 +108,7 @@ public class Personaje extends Entidad {
     public void attack() {
         if (!isAttacking) {
             isAttacking = true;
-            attackTimer = FRAME_DURATION * 7;
+            attackTimer = attackAnimation.getAnimationDuration();
             stateTime = 0;
         }
     }
