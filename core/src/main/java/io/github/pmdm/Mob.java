@@ -17,11 +17,20 @@ public class Mob extends Entidad {
     private boolean isDead = false;
     private boolean eliminar=false;
     private boolean isAttacking = false;
+    public enum Comportamiento { PATRULLA, PERSECUCION }
+    private Comportamiento comportamiento;
 
-    public Mob(float x, float y, String path, int cols, int filas, int filaIdle, int framesIdle, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead) {
+    private float minX, maxX;
+    private float velocidad = 120f;
+    private Vector2 velocityV = new Vector2();
+    public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead) {
         super(x, y);
         this.sheet = new Texture(path);
         this.attackBox = new Rectangle();
+        this.comportamiento = tipo;
+        this.minX = minX;
+        this.maxX = maxX;
+        this.facingRight = false;
 
         // Configuramos las animaciones estándar de tus Mobs
         animations.put("IDLE", crearAnimacion(sheet, filaIdle, framesIdle, cols, filas, 0.1f, Animation.PlayMode.LOOP));
@@ -39,32 +48,76 @@ public class Mob extends Entidad {
         }
         return frames;
     }
-    public void updateIA(float delta, Vector2 posProtagonista,  Array<Rectangle> superficies) {
-        updateStateTime(delta);
+    public void updateIA(float delta, Vector2 posProtagonista, Array<Rectangle> superficies) {
 
+        if (isDead) {
+            estadoActual = Estado.DEAD;
+        }
+
+        stateTime += delta;
         float dist = position.dst(posProtagonista);
 
-        if (dist < 70f && !isAttacking) {
+        if (!isAttacking) {
+            if (comportamiento == Comportamiento.PERSECUCION) {
+                if (posProtagonista.x > position.x) {
+                    velocityV.x = velocidad;
+                    facingRight = true;
+                } else {
+                    velocityV.x = -velocidad;
+                    facingRight = false;
+                }
+            } else {
+                if (facingRight) {
+                    velocityV.x = velocidad;
+                    if (position.x >= maxX) facingRight = false;
+                } else {
+                    velocityV.x = -velocidad;
+                    if (position.x <= minX) facingRight = true;
+                }
+            }
+            estadoActual = Estado.WALK;
+        }
+
+        if (dist < 80f && !isAttacking) {
             isAttacking = true;
-            estadoActual = Estado.ATTACK;
+            stateTime = 0;
+            velocityV.x = 0;
         }
 
         if (isAttacking) {
             estadoActual = Estado.ATTACK;
-            attackBox.set(facingRight ? position.x + 80 : position.x - 40, position.y + 20, 60, 60);
-
+            attackBox.set(facingRight ? position.x + 100 : position.x - 20, position.y + 20, 60, 60);
             if (animations.get("ATTACK").isAnimationFinished(stateTime)) {
                 isAttacking = false;
             }
-            position.x = MathUtils.clamp(position.x, 600,1700);
-
-        } else {
-            estadoActual = Estado.WALK;
-            float vel = 120 * delta;
-            if (posProtagonista.x > position.x) { position.x += vel; facingRight = true; }
-            else { position.x -= vel; facingRight = false; }
         }
+
+        velocityV.y -= 1000f * delta;
+
+        position.x += velocityV.x * delta;
         bounds.setPosition(position.x + 75, position.y);
+        for (Rectangle rect : superficies) {
+            if (bounds.overlaps(rect)) {
+                if (velocityV.x > 0) position.x = rect.x - bounds.width - 75;
+                else if (velocityV.x < 0) position.x = rect.x + rect.width - 75;
+                if(comportamiento == Comportamiento.PATRULLA) facingRight = !facingRight; // Rebota
+            }
+        }
+
+        position.y += velocityV.y * delta;
+        bounds.setPosition(position.x + 75, position.y);
+        for (Rectangle rect : superficies) {
+            if (bounds.overlaps(rect)) {
+                if (velocityV.y < 0) {
+                    position.y = rect.y + rect.height;
+                    velocityV.y = 0;
+                }
+            }
+        }
+
+        sprite.setPosition(position.x, position.y);
+        sprite.setRegion(animations.get(estadoActual.name()).getKeyFrame(stateTime));
+        sprite.setFlip(!facingRight, false);
     }
 
     @Override public void update(float delta) {}
