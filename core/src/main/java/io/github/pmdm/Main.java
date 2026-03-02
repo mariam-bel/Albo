@@ -36,7 +36,7 @@ public class Main extends ApplicationAdapter {
         background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
 
         mobs = new Array<>();
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, -20, Mob.Comportamiento.PATRULLA, 600,1000));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
 
@@ -44,15 +44,13 @@ public class Main extends ApplicationAdapter {
         prota = new Personaje(100, 1650);
 
         plataformas = new Array<>();
-        plataformas.add(new Plataformas(400, 20, 60, 120, "plataforma2.png"));
-        plataformas.add(new Plataformas(850, 150, 100, 150, "plataforma5.png"));
+        plataformas.add(new Plataformas(2300, 20, 60, 120, "plataforma2.png"));
         plataformas.add(new Plataformas(1600, 300, 60, 100, "plataforma2.png"));
-        plataformas.add(new Plataformas(1800, 500, 100, 120, "plataforma3.png"));
-        plataformas.add(new Plataformas(0, 0, 300, 750));
-        plataformas.add(new Plataformas(300, 0, 300, 500));
-        plataformas.add(new Plataformas(600, 150, 1500, 100));
-        plataformas.add(new Plataformas(0, -20, 20000, 50));
-
+        plataformas.add(new Plataformas(0, 0, 300, 740));
+        plataformas.add(new Plataformas(300, 200, 280, 300));
+        plataformas.add(new Plataformas(600, 200, 1500, 90));
+        plataformas.add(new Plataformas(1800, 500, 1500, 100));
+        plataformas.add(new Plataformas(0, 0, 2500, 1));
         controllers = new Controllers();
     }
 
@@ -67,8 +65,8 @@ public class Main extends ApplicationAdapter {
     public void handleInput() {
         Vector2 velocidad = prota.getVelocidad();
 
-        boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.D);
-        boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.A);
+        boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.D)|| Gdx.input.isKeyPressed(Input.Keys.RIGHT);
+        boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.A)|| Gdx.input.isKeyPressed(Input.Keys.LEFT);
         boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
         boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.W);
 

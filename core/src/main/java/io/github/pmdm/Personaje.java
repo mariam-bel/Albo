@@ -202,9 +202,14 @@ public class Personaje extends Entidad {
 
         if (!facingRight) protaSprite.setPosition(position.x - 25, position.y - 15);
         else protaSprite.setPosition(position.x - 35, position.y - 15);
+        float hitboxOffsetY = 0;
 
-        bounds.setPosition(position.x, position.y);
-        hurtBox.setPosition(position.x, position.y);
+        if (estadoActual == Estado.JUMP) {
+            hitboxOffsetY = 10f;
+        }
+
+        bounds.setPosition(position.x, position.y + hitboxOffsetY);
+        hurtBox.setPosition(position.x, position.y + hitboxOffsetY);
     }
 
     @Override
