@@ -9,13 +9,21 @@ public class Plataformas {
 
     private Rectangle bounds;
     private Texture texture;
+    private boolean atravesable;
 
     public Plataformas(float x, float y, float width, float height, String imagen) {
         texture = new Texture(imagen);
         bounds = new Rectangle(x, y, width, height);
-    }  public Plataformas(float x, float y, float width, float height) {
+    }
+
+    public boolean isAtravesable() {
+        return atravesable;
+    }
+
+    public Plataformas(float x, float y, float width, float height, boolean atravesar) {
         texture=null;
         bounds = new Rectangle(x, y, width, height);
+        atravesable=atravesar;
     }
 
     public void draw(SpriteBatch batch) {

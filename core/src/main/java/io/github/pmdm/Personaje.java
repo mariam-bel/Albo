@@ -133,17 +133,25 @@ public class Personaje extends Entidad {
         }
     }
 
-    public void update(float delta, Array<Rectangle> superficies) {
+    public void update(float delta, Array<Rectangle> superficies, Array<Plataformas> plataformasOriginales) {
         stateTime += delta;
         if (!isDead) {
             velocidad.y -= gravedad * delta;
             position.x += velocidad.x * delta;
             bounds.setPosition(position.x, position.y);
 
-            for (Rectangle rect : superficies) {
+            for (Plataformas p : plataformasOriginales) {
+                if (p.isAtravesable()) continue;
+                Rectangle rect = p.getBounds();
+
                 if (bounds.overlaps(rect)) {
-                    if (velocidad.x > 0) position.x = rect.x - bounds.width;
-                    else if (velocidad.x < 0) position.x = rect.x + rect.width;
+
+                    if (velocidad.x > 0) {
+                        position.x = rect.x - bounds.width;
+                    } else if (velocidad.x < 0) {
+                        position.x = rect.x + rect.width;
+                    }
+
                     velocidad.x = 0;
                     bounds.setPosition(position.x, position.y);
                 }
@@ -153,16 +161,37 @@ public class Personaje extends Entidad {
             bounds.setPosition(position.x, position.y);
             suelo = false;
 
-            for (Rectangle rect : superficies) {
+            for (Plataformas p : plataformasOriginales) {
+                Rectangle rect = p.getBounds();
+
                 if (bounds.overlaps(rect)) {
-                    if (velocidad.y > 0) {
-                        position.y = rect.y - bounds.height;
-                    } else if (velocidad.y < 0) {
-                        position.y = rect.y + rect.height;
-                        suelo = true;
-                        saltos = 0;
+                    if (p.isAtravesable()) {
+
+                        if (velocidad.y <= 0) {
+
+                            float personajeBottom = bounds.y;
+                            float plataformaTop = rect.y + rect.height;
+
+                            if (personajeBottom >= plataformaTop - 10) {
+                                position.y = plataformaTop;
+                                velocidad.y = 0;
+                                suelo = true;
+                                saltos = 0;
+                            }
+                        }
+
+                    } else {
+                        if (velocidad.y > 0) {
+                            position.y = rect.y - bounds.height;
+                        } else if (velocidad.y < 0) {
+                            position.y = rect.y + rect.height;
+                            suelo = true;
+                            saltos = 0;
+                        }
+
+                        velocidad.y = 0;
                     }
-                    velocidad.y = 0;
+
                     bounds.setPosition(position.x, position.y);
                 }
             }

@@ -48,6 +48,7 @@ public class Main extends ApplicationAdapter {
 
         mobs = new Array<>();
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
@@ -56,15 +57,17 @@ public class Main extends ApplicationAdapter {
         prota = new Personaje(100, 1650);
 
         plataformas = new Array<>();
-        plataformas.add(new Plataformas(2340, 1, 70, 100 ));
-        plataformas.add(new Plataformas(2200, 1, 175, 60 ));
-        plataformas.add(new Plataformas(1500, 300, 30, 100));
-        plataformas.add(new Plataformas(1535, 545, 50, 60));
-        plataformas.add(new Plataformas(0, 0, 300, 740));
-        plataformas.add(new Plataformas(300, 200, 280, 300));
-        plataformas.add(new Plataformas(600, 200, 1400, 90));
-        plataformas.add(new Plataformas(1820, 500, 1500, 100));
-        plataformas.add(new Plataformas(0, 0, 2500, 1));
+        plataformas.add(new Plataformas(2340, 1, 70, 100 , false));
+        plataformas.add(new Plataformas(2200, 1, 175, 60 , false));
+        plataformas.add(new Plataformas(1500, 300, 30, 100, true));
+        plataformas.add(new Plataformas(1535, 545, 50, 60, true));
+        plataformas.add(new Plataformas(1530, 800, 50, 60, true));
+        plataformas.add(new Plataformas(0, 0, 300, 740, false));
+        plataformas.add(new Plataformas(300, 200, 280, 300, false));
+        plataformas.add(new Plataformas(600, 200, 1400, 90, false));
+        plataformas.add(new Plataformas(1820, 500, 1500, 100, false));
+        plataformas.add(new Plataformas(1875, 600, 100, 38, true));
+        plataformas.add(new Plataformas(0, 0, 2500, 1, false));
         controllers = new Controllers();
 
         Gdx.input.setInputProcessor(menu.stage);
@@ -219,28 +222,28 @@ public class Main extends ApplicationAdapter {
         }
         batch.end();
 
-//            shapeRenderer.setProjectionMatrix(camara.combined);
-//            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-//            shapeRenderer.setColor(0, 1, 0, 1);
-//            for (Plataformas p : plataformas) {
-//                shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
-//            }
-//            if (!prota.shouldRemove()) {
-//                shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
-//
-//                shapeRenderer.setColor(1, 0, 0, 1);
-//                shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
-//            }
-//            shapeRenderer.setColor(0, 0, 1, 1);
-//            for (Mob m: mobs){
-//                if (!m.shouldRemove()) {
-//                    shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
-//                    if(m.isAttacking()) {
-//                        shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
-//                    }
-//                }
-//            }
-//            shapeRenderer.end();
+            shapeRenderer.setProjectionMatrix(camara.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            shapeRenderer.setColor(0, 1, 0, 1);
+            for (Plataformas p : plataformas) {
+                shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+            }
+            if (!prota.shouldRemove()) {
+                shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
+
+                shapeRenderer.setColor(1, 0, 0, 1);
+                shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+            }
+            shapeRenderer.setColor(0, 0, 1, 1);
+            for (Mob m: mobs){
+                if (!m.shouldRemove()) {
+                    shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+                    if(m.isAttacking()) {
+                        shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
+                    }
+                }
+            }
+            shapeRenderer.end();
 
             controllers.stage.act(deltaTime);
             controllers.update(deltaTime);
