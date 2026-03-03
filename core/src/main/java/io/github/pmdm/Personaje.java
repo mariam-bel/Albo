@@ -197,6 +197,7 @@ public class Personaje extends Entidad {
             }
 
             position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth()+50);
+            position.y = MathUtils.clamp(position.y, 0, Gdx.graphics.getHeight() - protaSprite.getHeight()+20);
             if (position.y <= 0) {
                 position.y = 0;
                 velocidad.y = 0;
