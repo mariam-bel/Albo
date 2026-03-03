@@ -171,7 +171,7 @@ public class Main extends ApplicationAdapter {
                 m.updateIA(deltaTime, prota.getPosition(), colisiones);
             }
 
-            prota.update(deltaTime, colisiones);
+            prota.update(deltaTime, colisiones, plataformas);
             if (prota.isDead()) {
                 volverAlMenu();
                 return;
