@@ -44,7 +44,6 @@ public class Controllers {
         tableVidas.top().left();
         tableVidas.pad(20);
 
-        // BUSCAR ASSET CORAZÓN
         TextureRegion[][] temp = TextureRegion.split(texturaVida,
             texturaVida.getWidth() / 3,
             texturaVida.getHeight() / 2);
