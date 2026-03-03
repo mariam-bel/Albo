@@ -55,7 +55,7 @@ public class Main extends ApplicationAdapter {
         plataformas.add(new Plataformas(2200, 1, 175, 60 , false));
         plataformas.add(new Plataformas(1500, 300, 30, 100, true));
         plataformas.add(new Plataformas(1535, 545, 50, 60, true));
-        plataformas.add(new Plataformas(1530, 800, 50, 60, true));
+        plataformas.add(new Plataformas(1510, 790, 50, 90, true));
         plataformas.add(new Plataformas(0, 0, 300, 740, false));
         plataformas.add(new Plataformas(300, 200, 280, 300, false));
         plataformas.add(new Plataformas(600, 200, 1400, 90, false));
