@@ -37,7 +37,7 @@ public class Personaje extends Entidad {
 
     private float hurtTimer = 0;
     private final float HURT_DURATION = FRAME_DURATION * 8;
-    private int vidas = 3;
+    private int vidas = 5;
     boolean eliminar=false;
 
     public Personaje(float inicioX, float inicioY) {
@@ -150,7 +150,7 @@ public class Personaje extends Entidad {
                 }
             }
 
-            position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth());
+            position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth()+50);
             if (position.y <= 0) {
                 position.y = 0;
                 velocidad.y = 0;

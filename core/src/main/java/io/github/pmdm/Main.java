@@ -44,8 +44,8 @@ public class Main extends ApplicationAdapter {
         prota = new Personaje(100, 1650);
 
         plataformas = new Array<>();
-        plataformas.add(new Plataformas(2100, 110, 60, 120, "plataforma2.png"));
-        plataformas.add(new Plataformas(1600, 300, 60, 100, "plataforma2.png"));
+        plataformas.add(new Plataformas(2300, 1, 100, 110 ));
+        plataformas.add(new Plataformas(1500, 300, 30, 100));
         plataformas.add(new Plataformas(0, 0, 300, 740));
         plataformas.add(new Plataformas(300, 200, 280, 300));
         plataformas.add(new Plataformas(600, 200, 1500, 90));
@@ -88,23 +88,24 @@ public class Main extends ApplicationAdapter {
         prota.setVelocidad(velocidad);
     }
 
-    int vidaMob = 1;
     public void checkAttack() {
-        for (Mob m: mobs){
+        for (Mob m : mobs) {
             if (prota.isAttacking()) {
                 if (!golpeRealizado && prota.getAttackBox().overlaps(m.getBounds())) {
-                    vidaMob--;
+                    m.recibirDanio(1);
                     golpeRealizado = true;
-                    if (vidaMob <= 0) {
-                        m.setDead(true);
-                    }
                 }
             } else {
                 golpeRealizado = false;
             }
         }
-
+        for (int i = mobs.size - 1; i >= 0; i--) {
+            if (mobs.get(i).shouldRemove()) {
+                mobs.removeIndex(i);
+            }
+        }
     }
+
 
     @Override
     public void render() {
@@ -157,7 +158,9 @@ public class Main extends ApplicationAdapter {
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         for (Mob m: mobs) {
-            m.draw(batch);
+            if (!m.shouldRemove()) {
+                m.draw(batch);
+            }
         }
         if (!prota.shouldRemove()) {
             prota.draw(batch);
