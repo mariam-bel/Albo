@@ -12,6 +12,10 @@ import com.badlogic.gdx.utils.Array;
 import java.util.Objects;
 
 public class Mob extends Entidad {
+    private int vidas = 3;
+    private int fuerza = 1;
+    public boolean golpeAplicado = false;
+    private String nombre;
     private Texture sheet;
     private Animation<TextureRegion> walkAnimation, attack1Animation, idleAnimation, deadAnimation;
     private final float FRAME_DURATION = 0.1f;
@@ -127,6 +131,7 @@ public class Mob extends Entidad {
             attackBox.set(attackArea);
             if (animations.get("ATTACK").isAnimationFinished(stateTime)) {
                 isAttacking = false;
+                golpeAplicado = false;
             }
         }
 
@@ -160,6 +165,22 @@ public class Mob extends Entidad {
         sprite.setPosition(position.x, position.y);
         sprite.setRegion(animations.get(estadoActual.name()).getKeyFrame(stateTime));
         sprite.setFlip(!facingRight, false);
+    }
+    public void setComportamiento(Comportamiento c) { this.comportamiento = c; }
+    public int getVidas() { return vidas; }
+    public String getNombre() { return nombre; }
+
+    public void quitarVida(int cantidad) {
+        this.vidas -= cantidad;
+        if (this.vidas <= 0) {
+            this.isDead = true;
+        }
+    }
+
+    public void aplicarMejorasAleatorias() {
+        this.velocidad += MathUtils.random(20f, 100f);
+        this.fuerza += MathUtils.random(1, 3);
+        this.vidas += MathUtils.random(5, 10);
     }
 
     @Override public void update(float delta) {}
