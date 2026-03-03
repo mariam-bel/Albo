@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -16,8 +17,11 @@ import com.badlogic.gdx.utils.Array;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    enum Estado { INICIO, JUGANDO }
+    enum Estado { INICIO, JUGANDO, APUESTA, PELEA_MOBS, FIN_JUEGO }
     Estado estadoActual = Estado.INICIO;
+    BitmapFont font;
+    Mob mobApostado;
+    Mob mobGanador;
     Menu menu;
     Plataformas suelo;
     ShapeRenderer shapeRenderer;
@@ -39,6 +43,8 @@ public class Main extends ApplicationAdapter {
         world = new World(new Vector2(0,-10), true);
         menu = new Menu();
         background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
+        font = new BitmapFont();
+        font.getData().setScale(2f);
 
         mobs = new Array<>();
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
@@ -61,6 +67,21 @@ public class Main extends ApplicationAdapter {
         plataformas.add(new Plataformas(0, 0, 2500, 1));
         controllers = new Controllers();
 
+        Gdx.input.setInputProcessor(menu.stage);
+    }
+
+    private void volverAlMenu() {
+        estadoActual = Estado.INICIO;
+
+        prota = new Personaje(100, 1650);
+
+        mobs.clear();
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
+
+        menu = new Menu();
         Gdx.input.setInputProcessor(menu.stage);
     }
 
@@ -148,6 +169,10 @@ public class Main extends ApplicationAdapter {
             }
 
             prota.update(deltaTime, colisiones);
+            if (prota.isDead()) {
+                volverAlMenu();
+                return;
+            }
 
             for (Mob m: mobs){
                 if (m.isAttacking()) {
@@ -186,6 +211,8 @@ public class Main extends ApplicationAdapter {
         }
         if (!prota.shouldRemove()) {
             prota.draw(batch);
+        } else {
+
         }
         for (Plataformas p : plataformas) {
             p.draw(batch);

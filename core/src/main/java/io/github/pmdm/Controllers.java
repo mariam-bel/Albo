@@ -98,6 +98,19 @@ public class Controllers {
                 setAtacar(false);
             }
         });
+        Image btnAtacar2 = new Image(new Texture("T_S_Square_Alt.png"));
+        btnAtacar2.setSize(50,50);
+        btnAtacar2.addListener(new InputListener(){
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                setAtacar(true);
+                return true;
+            }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                setAtacar(false);
+            }
+        });
 
         Image btnAvanzar = new Image(new Texture("T_S_Right_Alt.png"));
         btnAvanzar.setSize(50,50);
@@ -136,6 +149,8 @@ public class Controllers {
 
         tableDerecha.add();
         tableDerecha.row().pad(5,5,5,5);
+        //tableDerecha.add(btnAtacar2).size(btnAtacar2.getWidth(), btnAtacar2.getHeight());
+        //tableDerecha.add();
         tableDerecha.add(btnAtacar).size(btnAtacar.getWidth(), btnAtacar.getHeight());
         tableDerecha.add();
         tableDerecha.add(btnSaltar).size(btnSaltar.getWidth(), btnSaltar.getHeight());
