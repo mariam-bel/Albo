@@ -44,17 +44,20 @@ public class Main extends ApplicationAdapter {
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
 
 
         prota = new Personaje(100, 1650);
 
         plataformas = new Array<>();
-        plataformas.add(new Plataformas(2100, 110, 60, 120, "plataforma2.png"));
-        plataformas.add(new Plataformas(1600, 300, 60, 100, "plataforma2.png"));
+        plataformas.add(new Plataformas(2340, 1, 70, 100 ));
+        plataformas.add(new Plataformas(2200, 1, 175, 60 ));
+        plataformas.add(new Plataformas(1500, 300, 30, 100));
+        plataformas.add(new Plataformas(1535, 545, 50, 60));
         plataformas.add(new Plataformas(0, 0, 300, 740));
         plataformas.add(new Plataformas(300, 200, 280, 300));
-        plataformas.add(new Plataformas(600, 200, 1500, 90));
-        plataformas.add(new Plataformas(1800, 500, 1500, 100));
+        plataformas.add(new Plataformas(600, 200, 1400, 90));
+        plataformas.add(new Plataformas(1820, 500, 1500, 100));
         plataformas.add(new Plataformas(0, 0, 2500, 1));
         controllers = new Controllers();
 
@@ -95,23 +98,24 @@ public class Main extends ApplicationAdapter {
         prota.setVelocidad(velocidad);
     }
 
-    int vidaMob = 1;
     public void checkAttack() {
-        for (Mob m: mobs){
+        for (Mob m : mobs) {
             if (prota.isAttacking()) {
                 if (!golpeRealizado && prota.getAttackBox().overlaps(m.getBounds())) {
-                    vidaMob--;
+                    m.recibirDanio(1);
                     golpeRealizado = true;
-                    if (vidaMob <= 0) {
-                        m.setDead(true);
-                    }
                 }
             } else {
                 golpeRealizado = false;
             }
         }
-
+        for (int i = mobs.size - 1; i >= 0; i--) {
+            if (mobs.get(i).shouldRemove()) {
+                mobs.removeIndex(i);
+            }
+        }
     }
+
 
     @Override
     public void render() {
@@ -150,7 +154,7 @@ public class Main extends ApplicationAdapter {
                     if (m.getAttackBox().overlaps(prota.getBounds())) {
                         if (!prota.isHurt() && !prota.isDead()) {
                             prota.quitarVida(1);
-                            controllers.actualizarVidas(1);
+                            controllers.actualizarVidas(prota.getVidas());
                             if (prota.getVidas() <= 0) {
                                 prota.setDead(true);
                             }
@@ -175,39 +179,41 @@ public class Main extends ApplicationAdapter {
             batch.begin();
             batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-            for (Mob m: mobs) {
+        for (Mob m: mobs) {
+            if (!m.shouldRemove()) {
                 m.draw(batch);
             }
-            if (!prota.shouldRemove()) {
-                prota.draw(batch);
-            }
-            for (Plataformas p : plataformas) {
-                p.draw(batch);
-            }
-            batch.end();
+        }
+        if (!prota.shouldRemove()) {
+            prota.draw(batch);
+        }
+        for (Plataformas p : plataformas) {
+            p.draw(batch);
+        }
+        batch.end();
 
-            shapeRenderer.setProjectionMatrix(camara.combined);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-            shapeRenderer.setColor(0, 1, 0, 1);
-            for (Plataformas p : plataformas) {
-                shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
-            }
-            if (!prota.shouldRemove()) {
-                shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
-
-                shapeRenderer.setColor(1, 0, 0, 1);
-                shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
-            }
-            shapeRenderer.setColor(0, 0, 1, 1);
-            for (Mob m: mobs){
-                if (!m.shouldRemove()) {
-                    shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
-                    if(m.isAttacking()) {
-                        shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
-                    }
-                }
-            }
-            shapeRenderer.end();
+//            shapeRenderer.setProjectionMatrix(camara.combined);
+//            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+//            shapeRenderer.setColor(0, 1, 0, 1);
+//            for (Plataformas p : plataformas) {
+//                shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+//            }
+//            if (!prota.shouldRemove()) {
+//                shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
+//
+//                shapeRenderer.setColor(1, 0, 0, 1);
+//                shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+//            }
+//            shapeRenderer.setColor(0, 0, 1, 1);
+//            for (Mob m: mobs){
+//                if (!m.shouldRemove()) {
+//                    shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+//                    if(m.isAttacking()) {
+//                        shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
+//                    }
+//                }
+//            }
+//            shapeRenderer.end();
 
             controllers.stage.act(deltaTime);
             controllers.update(deltaTime);
