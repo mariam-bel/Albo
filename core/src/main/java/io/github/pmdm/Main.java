@@ -150,6 +150,7 @@ public class Main extends ApplicationAdapter {
                     if (m.getAttackBox().overlaps(prota.getBounds())) {
                         if (!prota.isHurt() && !prota.isDead()) {
                             prota.quitarVida(1);
+                            controllers.actualizarVidas(1);
                             if (prota.getVidas() <= 0) {
                                 prota.setDead(true);
                             }
@@ -209,6 +210,7 @@ public class Main extends ApplicationAdapter {
             shapeRenderer.end();
 
             controllers.stage.act(deltaTime);
+            controllers.update(deltaTime);
             controllers.draw();
         }
     }
