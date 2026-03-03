@@ -37,9 +37,11 @@ public class Personaje extends Entidad {
 
     private float hurtTimer = 0;
     private final float HURT_DURATION = FRAME_DURATION * 8;
-    private int vidas = 5;
+    private int vidas = 3;
     boolean eliminar=false;
-
+    private boolean isInvulnerable = false;
+    private float invulnerableTimer = 0f;
+    private final float INVULNERABLE_DURATION = 1.5f;
     public Personaje(float inicioX, float inicioY) {
         super( 10, 0.2f);
 
@@ -67,7 +69,7 @@ public class Personaje extends Entidad {
        // ATTACK 2 (filas 9 y 10)
         attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 9, 10,10), Animation.PlayMode.NORMAL);
         // HURT (fila 7)
-        hurtAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 7,7, 4), Animation.PlayMode.NORMAL);
+        hurtAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 7,7, 4), Animation.PlayMode.LOOP);
         // DEAD (fila 6)
         deadAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 6, 6,10), Animation.PlayMode.NORMAL);
 
@@ -114,12 +116,20 @@ public class Personaje extends Entidad {
     }
 
     public void quitarVida(int cantidad) {
-        if (!isHurt) {
+        if (!isInvulnerable && !isDead) {
+
             vidas -= cantidad;
+
             isHurt = true;
-            hurtTimer = HURT_DURATION;
+            isInvulnerable = true;
+
+            hurtTimer = 0.5f;
+            invulnerableTimer = INVULNERABLE_DURATION;
+
             stateTime = 0;
-            if (facingRight) velocidad.x = -200; else velocidad.x = 200;
+
+            if (facingRight) velocidad.x = -200;
+            else velocidad.x = 200;
         }
     }
 
@@ -174,7 +184,16 @@ public class Personaje extends Entidad {
             }
             if (isHurt) {
                 hurtTimer -= delta;
-                if (hurtTimer <= 0) isHurt = false;
+                if (hurtTimer <= 0) {
+                    isHurt = false;
+                }
+            }
+
+            if (isInvulnerable) {
+                invulnerableTimer -= delta;
+                if (invulnerableTimer <= 0) {
+                    isInvulnerable = false;
+                }
             }
 
             if (isAttacking) {
@@ -184,15 +203,12 @@ public class Personaje extends Entidad {
             }
 
             estadoAnterior = estadoActual;
-            if (!isDead) {
-                if (isAttacking) estadoActual = Estado.ATTACK;
-                else if (Math.abs(velocidad.y) > 1f) estadoActual = Estado.JUMP;
-                else if (Math.abs(velocidad.x) > 5f) estadoActual = Estado.WALK;
-                else if (isHurt) estadoActual = Estado.HURT;
-                else estadoActual = Estado.IDLE;
-            } else {
-                estadoActual = Estado.DEAD;
-            }
+            if (isDead) estadoActual = Estado.DEAD;
+            else if (isHurt) estadoActual = Estado.HURT;
+            else if (isAttacking) estadoActual = Estado.ATTACK;
+            else if (Math.abs(velocidad.y) > 1f) estadoActual = Estado.JUMP;
+            else if (Math.abs(velocidad.x) > 5f) estadoActual = Estado.WALK;
+            else estadoActual = Estado.IDLE;
 
             if (estadoActual != estadoAnterior) stateTime = 0;
 
@@ -227,6 +243,13 @@ public class Personaje extends Entidad {
 
     @Override
     public void draw(SpriteBatch batch) {
+
+        if (isInvulnerable) {
+            if ((int)(invulnerableTimer * 10) % 2 == 0) {
+                return;
+            }
+        }
+
         protaSprite.draw(batch);
     }
 
