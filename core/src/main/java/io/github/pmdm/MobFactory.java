@@ -15,7 +15,7 @@ public class MobFactory {
                 return new Mob(x, y,Mob.Comportamiento.PERSECUCION, 0, 0,"ratBaseV2-Sheet.png",10, 7,0,10,2,3,4,9,6,6);
 
             case SLIME:
-                return new Mob(x, y,Mob.Comportamiento.PATRULLA, 550,700,"slimeBasicV2-Sheet.png",12, 7,0,10,1,10,3,12,6,9);
+                return new Mob(x, y,Mob.Comportamiento.PATRULLA, 550,900,"slimeBasicV2-Sheet.png",12, 7,0,10,1,10,3,12,6,9);
 
             default:
                 return null;

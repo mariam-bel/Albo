@@ -167,28 +167,28 @@ public class Main extends ApplicationAdapter {
         }
         batch.end();
 
-        shapeRenderer.setProjectionMatrix(camara.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(0, 1, 0, 1);
-        for (Plataformas p : plataformas) {
-            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
-        }
-        if (!prota.shouldRemove()) {
-            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
-
-            shapeRenderer.setColor(1, 0, 0, 1);
-            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
-        }
-        shapeRenderer.setColor(0, 0, 1, 1);
-        for (Mob m: mobs){
-            if (!m.shouldRemove()) {
-                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
-                if(m.isAttacking()) {
-                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
-                }
-            }
-        }
-        shapeRenderer.end();
+//        shapeRenderer.setProjectionMatrix(camara.combined);
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+//        shapeRenderer.setColor(0, 1, 0, 1);
+//        for (Plataformas p : plataformas) {
+//            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+//        }
+//        if (!prota.shouldRemove()) {
+//            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
+//
+//            shapeRenderer.setColor(1, 0, 0, 1);
+//            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+//        }
+//        shapeRenderer.setColor(0, 0, 1, 1);
+//        for (Mob m: mobs){
+//            if (!m.shouldRemove()) {
+//                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+//                if(m.isAttacking()) {
+//                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
+//                }
+//            }
+//        }
+//        shapeRenderer.end();
 
         controllers.stage.act(deltaTime);
         controllers.draw();
