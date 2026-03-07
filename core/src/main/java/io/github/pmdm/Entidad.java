@@ -40,6 +40,25 @@ public abstract class Entidad {
         }
         return new Animation<>(frameDuration, frames, mode);
     }
+    protected Animation<TextureRegion> crearAnimacionMuchasFilas(Texture sheet, int[] filas, int[] cantidadesPorFila, int colTotales, int filTotales, float frameDuration, Animation.PlayMode mode) {
+
+        int fw = sheet.getWidth() / colTotales;
+        int fh = sheet.getHeight() / filTotales;
+        TextureRegion[][] temp = TextureRegion.split(sheet, fw, fh);
+
+        Array<TextureRegion> frames = new Array<>();
+
+        for (int f = 0; f < filas.length; f++) {
+            int fila = filas[f];
+            int cantidad = cantidadesPorFila[f];
+
+            for (int i = 0; i < cantidad; i++) {
+                frames.add(temp[fila][i]);
+            }
+        }
+
+        return new Animation<>(frameDuration, frames, mode);
+    }
 
     protected void updateStateTime(float delta) {
         stateTime += delta;

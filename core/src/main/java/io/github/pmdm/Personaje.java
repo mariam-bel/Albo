@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Personaje extends Entidad {
-    private Animation<TextureRegion> walkAnimation, jumpAnimation, attackAnimation, idleAnimation, hurtAnimation, deadAnimation;
+    private Animation<TextureRegion> walkAnimation, jumpAnimation, attackAnimation, attack2Animation, idleAnimation, hurtAnimation, deadAnimation;
     private Texture protaImg;
     private Sprite protaSprite;
     public Vector2 position, velocidad;
@@ -39,7 +39,9 @@ public class Personaje extends Entidad {
     private final float HURT_DURATION = FRAME_DURATION * 8;
     private int vidas = 3;
     boolean eliminar=false;
-
+    private boolean isInvulnerable = false;
+    private float invulnerableTimer = 0f;
+    private final float INVULNERABLE_DURATION = 1.5f;
     public Personaje(float inicioX, float inicioY) {
         super( 10, 0.2f);
 
@@ -57,17 +59,19 @@ public class Personaje extends Entidad {
         TextureRegion[][] regions = TextureRegion.split(protaImg, frameWidth, frameHeight);
 
         // IDLE (fila 0)
-        idleAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 0, 6), Animation.PlayMode.LOOP);
+        idleAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 0, 0,6), Animation.PlayMode.LOOP);
         // WALK (fila 1)
-        walkAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 1, 8), Animation.PlayMode.LOOP);
+        walkAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 1, 1,8), Animation.PlayMode.LOOP);
         // JUMP (fila 4)
-        jumpAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 4, 6), Animation.PlayMode.NORMAL);
+        jumpAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 4, 4,6), Animation.PlayMode.NORMAL);
         // ATTACK (fila 3)
-        attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 3, 7), Animation.PlayMode.NORMAL);
+        //attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 3, 3,7), Animation.PlayMode.NORMAL);
+       // ATTACK 2 (filas 9 y 10)
+        attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 9, 10,10), Animation.PlayMode.NORMAL);
         // HURT (fila 7)
-        hurtAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 7, 4), Animation.PlayMode.NORMAL);
+        hurtAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 7,7, 4), Animation.PlayMode.LOOP);
         // DEAD (fila 6)
-        deadAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 6, 10), Animation.PlayMode.NORMAL);
+        deadAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 6, 6,10), Animation.PlayMode.NORMAL);
 
         protaSprite = new Sprite(regions[0][0]);
         protaSprite.setSize(100, 100);
@@ -80,11 +84,16 @@ public class Personaje extends Entidad {
         bounds = new Rectangle(inicioX + 30, inicioY, 40, 70);
     }
 
-    private Array<TextureRegion> getFrames(TextureRegion[][] regions, int fila, int cantidad) {
+    private Array<TextureRegion> getFrames(TextureRegion[][] regions, int filaInicio, int filaFin,int columnasPorFila) {
+
         Array<TextureRegion> frames = new Array<>();
-        for (int i = 0; i < cantidad; i++) {
-            frames.add(regions[fila][i]);
+
+        for (int fila = filaInicio; fila <= filaFin; fila++) {
+            for (int col = 0; col < columnasPorFila; col++) {
+                frames.add(regions[fila][col]);
+            }
         }
+
         return frames;
     }
 
@@ -101,32 +110,48 @@ public class Personaje extends Entidad {
     public void attack() {
         if (!isAttacking) {
             isAttacking = true;
-            attackTimer = FRAME_DURATION * 7;
+            attackTimer = attackAnimation.getAnimationDuration();
             stateTime = 0;
         }
     }
 
     public void quitarVida(int cantidad) {
-        if (!isHurt) {
+        if (!isInvulnerable && !isDead) {
+
             vidas -= cantidad;
+
             isHurt = true;
-            hurtTimer = HURT_DURATION;
+            isInvulnerable = true;
+
+            hurtTimer = 0.5f;
+            invulnerableTimer = INVULNERABLE_DURATION;
+
             stateTime = 0;
-            if (facingRight) velocidad.x = -200; else velocidad.x = 200;
+
+            if (facingRight) velocidad.x = -200;
+            else velocidad.x = 200;
         }
     }
 
-    public void update(float delta, Array<Rectangle> superficies) {
+    public void update(float delta, Array<Rectangle> superficies, Array<Plataformas> plataformasOriginales) {
         stateTime += delta;
         if (!isDead) {
             velocidad.y -= gravedad * delta;
             position.x += velocidad.x * delta;
             bounds.setPosition(position.x, position.y);
 
-            for (Rectangle rect : superficies) {
+            for (Plataformas p : plataformasOriginales) {
+                if (p.isAtravesable()) continue;
+                Rectangle rect = p.getBounds();
+
                 if (bounds.overlaps(rect)) {
-                    if (velocidad.x > 0) position.x = rect.x - bounds.width;
-                    else if (velocidad.x < 0) position.x = rect.x + rect.width;
+
+                    if (velocidad.x > 0) {
+                        position.x = rect.x - bounds.width;
+                    } else if (velocidad.x < 0) {
+                        position.x = rect.x + rect.width;
+                    }
+
                     velocidad.x = 0;
                     bounds.setPosition(position.x, position.y);
                 }
@@ -136,21 +161,43 @@ public class Personaje extends Entidad {
             bounds.setPosition(position.x, position.y);
             suelo = false;
 
-            for (Rectangle rect : superficies) {
+            for (Plataformas p : plataformasOriginales) {
+                Rectangle rect = p.getBounds();
+
                 if (bounds.overlaps(rect)) {
-                    if (velocidad.y > 0) {
-                        position.y = rect.y - bounds.height;
-                    } else if (velocidad.y < 0) {
-                        position.y = rect.y + rect.height;
-                        suelo = true;
-                        saltos = 0;
+                    if (p.isAtravesable()) {
+
+                        if (velocidad.y <= 0) {
+
+                            float personajeBottom = bounds.y;
+                            float plataformaTop = rect.y + rect.height;
+
+                            if (personajeBottom >= plataformaTop - 10) {
+                                position.y = plataformaTop;
+                                velocidad.y = 0;
+                                suelo = true;
+                                saltos = 0;
+                            }
+                        }
+
+                    } else {
+                        if (velocidad.y > 0) {
+                            position.y = rect.y - bounds.height;
+                        } else if (velocidad.y < 0) {
+                            position.y = rect.y + rect.height;
+                            suelo = true;
+                            saltos = 0;
+                        }
+
+                        velocidad.y = 0;
                     }
-                    velocidad.y = 0;
+
                     bounds.setPosition(position.x, position.y);
                 }
             }
 
-            position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth());
+            position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth()+50);
+            position.y = MathUtils.clamp(position.y, 0, Gdx.graphics.getHeight() - protaSprite.getHeight()+20);
             if (position.y <= 0) {
                 position.y = 0;
                 velocidad.y = 0;
@@ -167,7 +214,16 @@ public class Personaje extends Entidad {
             }
             if (isHurt) {
                 hurtTimer -= delta;
-                if (hurtTimer <= 0) isHurt = false;
+                if (hurtTimer <= 0) {
+                    isHurt = false;
+                }
+            }
+
+            if (isInvulnerable) {
+                invulnerableTimer -= delta;
+                if (invulnerableTimer <= 0) {
+                    isInvulnerable = false;
+                }
             }
 
             if (isAttacking) {
@@ -177,15 +233,12 @@ public class Personaje extends Entidad {
             }
 
             estadoAnterior = estadoActual;
-            if (!isDead) {
-                if (isAttacking) estadoActual = Estado.ATTACK;
-                else if (Math.abs(velocidad.y) > 1f) estadoActual = Estado.JUMP;
-                else if (Math.abs(velocidad.x) > 5f) estadoActual = Estado.WALK;
-                else if (isHurt) estadoActual = Estado.HURT;
-                else estadoActual = Estado.IDLE;
-            } else {
-                estadoActual = Estado.DEAD;
-            }
+            if (isDead) estadoActual = Estado.DEAD;
+            else if (isHurt) estadoActual = Estado.HURT;
+            else if (isAttacking) estadoActual = Estado.ATTACK;
+            else if (Math.abs(velocidad.y) > 1f) estadoActual = Estado.JUMP;
+            else if (Math.abs(velocidad.x) > 5f) estadoActual = Estado.WALK;
+            else estadoActual = Estado.IDLE;
 
             if (estadoActual != estadoAnterior) stateTime = 0;
 
@@ -220,6 +273,13 @@ public class Personaje extends Entidad {
 
     @Override
     public void draw(SpriteBatch batch) {
+
+        if (isInvulnerable) {
+            if ((int)(invulnerableTimer * 10) % 2 == 0) {
+                return;
+            }
+        }
+
         protaSprite.draw(batch);
     }
 

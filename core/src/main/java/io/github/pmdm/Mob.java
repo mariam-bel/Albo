@@ -12,6 +12,10 @@ import com.badlogic.gdx.utils.Array;
 import java.util.Objects;
 
 public class Mob extends Entidad {
+    private int vidas = 3;
+    private int fuerza = 1;
+    public boolean golpeAplicado = false;
+    private String nombre;
     private Texture sheet;
     private Animation<TextureRegion> walkAnimation, attack1Animation, idleAnimation, deadAnimation;
     private final float FRAME_DURATION = 0.1f;
@@ -27,10 +31,11 @@ public class Mob extends Entidad {
     private Vector2 velocityV = new Vector2();
 
     private Rectangle attackArea = new Rectangle();
-    private float attackRangeX = 100;
+    private float attackRangeX = 80;
     private float attackRangeY = 60;
+    private int vida;
 
-    public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead) {
+    public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead, int vidas) {
         super(x, y);
         this.sheet = new Texture(path);
         this.attackBox = new Rectangle();
@@ -38,6 +43,7 @@ public class Mob extends Entidad {
         this.minX = minX;
         this.maxX = maxX;
         this.facingRight = false;
+        this.vida=vidas;
 
         // Configuración de las animaciones estándar de los Mobs
         animations.put("IDLE", crearAnimacion(sheet, filaIdle, framesIdle, cols, filas, 0.1f, Animation.PlayMode.LOOP));
@@ -65,11 +71,21 @@ public class Mob extends Entidad {
     }
     public void updateIA(float delta, Vector2 posProtagonista, Array<Rectangle> superficies) {
 
+        stateTime += delta;
+
         if (isDead) {
             estadoActual = Estado.DEAD;
+            velocityV.set(0,0);
+
+            if (animations.get("DEAD").isAnimationFinished(stateTime)) {
+                eliminar = true;
+            }
+
+            sprite.setRegion(animations.get("DEAD").getKeyFrame(stateTime));
+            sprite.setPosition(position.x, position.y);
+            return;
         }
 
-        stateTime += delta;
         if (!isAttacking) {
             if (comportamiento == Comportamiento.PERSECUCION) {
                 if (Math.abs(posProtagonista.x - position.x) > 5f) {
@@ -100,9 +116,9 @@ public class Mob extends Entidad {
         }
         Rectangle playerRect = new Rectangle(posProtagonista.x, posProtagonista.y, 50, 100); // ajusta tamaño del jugador
         if(facingRight){
-            attackArea.set(position.x + 50, position.y+50, attackRangeX, attackRangeY);
+            attackArea.set(position.x +75, position.y+50, attackRangeX, attackRangeY);
         } else {
-            attackArea.set(position.x+150 - attackRangeX, position.y+50, attackRangeX, attackRangeY);
+            attackArea.set(position.x+125 - attackRangeX, position.y+50, attackRangeX, attackRangeY);
         }
         if (!isAttacking&& attackArea.overlaps(playerRect)) {
             isAttacking = true;
@@ -115,6 +131,7 @@ public class Mob extends Entidad {
             attackBox.set(attackArea);
             if (animations.get("ATTACK").isAnimationFinished(stateTime)) {
                 isAttacking = false;
+                golpeAplicado = false;
             }
         }
 
@@ -149,6 +166,22 @@ public class Mob extends Entidad {
         sprite.setRegion(animations.get(estadoActual.name()).getKeyFrame(stateTime));
         sprite.setFlip(!facingRight, false);
     }
+    public void setComportamiento(Comportamiento c) { this.comportamiento = c; }
+    public int getVidas() { return vidas; }
+    public String getNombre() { return nombre; }
+
+    public void quitarVida(int cantidad) {
+        this.vidas -= cantidad;
+        if (this.vidas <= 0) {
+            this.isDead = true;
+        }
+    }
+
+    public void aplicarMejorasAleatorias() {
+        this.velocidad += MathUtils.random(20f, 100f);
+        this.fuerza += MathUtils.random(1, 3);
+        this.vidas += MathUtils.random(5, 10);
+    }
 
     @Override public void update(float delta) {}
     public Rectangle getAttackBox() { return attackBox; }
@@ -158,7 +191,16 @@ public class Mob extends Entidad {
     public boolean shouldRemove() {
         return eliminar;
     }
+    public void recibirDanio(int cantidad) {
+        if (isDead) return;
 
+        vida -= cantidad;
+
+        if (vida <= 0) {
+            isDead = true;
+            stateTime = 0;
+        }
+    }
     @Override
     public void dispose() {
         sheet.dispose();
