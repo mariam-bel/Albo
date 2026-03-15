@@ -80,12 +80,14 @@ public class Main extends ApplicationAdapter {
 
         mobs.clear();
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
+        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
 
         menu = new Menu();
         Gdx.input.setInputProcessor(menu.stage);
+
     }
 
     @Override
@@ -172,7 +174,7 @@ public class Main extends ApplicationAdapter {
             }
 
             prota.update(deltaTime, colisiones,plataformas);
-            if (prota.isDead()) {
+            if (prota.shouldRemove()) {
                 volverAlMenu();
                 return;
             }
@@ -214,8 +216,6 @@ public class Main extends ApplicationAdapter {
         }
         if (!prota.shouldRemove()) {
             prota.draw(batch);
-        } else {
-
         }
         for (Plataformas p : plataformas) {
             p.draw(batch);
