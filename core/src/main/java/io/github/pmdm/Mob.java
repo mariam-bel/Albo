@@ -1,6 +1,5 @@
 package io.github.pmdm;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -21,8 +20,18 @@ public class Mob extends Entidad {
     private final float FRAME_DURATION = 0.1f;
     private Rectangle attackBox;
     private boolean isDead = false;
+    private boolean isHurt = false;
     private boolean eliminar=false;
     private boolean isAttacking = false;
+
+    public boolean isHurt() {
+        return isHurt;
+    }
+
+    public void setHurt(boolean hurt) {
+        isHurt = hurt;
+    }
+
     public enum Comportamiento { PATRULLA, PERSECUCION }
     private Comportamiento comportamiento;
 
@@ -35,7 +44,7 @@ public class Mob extends Entidad {
     private float attackRangeY = 60;
     private int vida;
 
-    public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead, int vidas) {
+    public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle,int filaHurt, int framesHurt, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead, int vidas) {
         super(x, y);
         this.sheet = new Texture(path);
         this.attackBox = new Rectangle();
@@ -48,6 +57,7 @@ public class Mob extends Entidad {
         // Configuración de las animaciones estándar de los Mobs
         animations.put("IDLE", crearAnimacion(sheet, filaIdle, framesIdle, cols, filas, 0.1f, Animation.PlayMode.LOOP));
         animations.put("WALK", crearAnimacion(sheet, filaWalk, framesWalk, cols, filas, 0.1f, Animation.PlayMode.LOOP));
+        animations.put("HURT", crearAnimacion(sheet, filaWalk, framesWalk, cols, filas, 0.1f, Animation.PlayMode.LOOP));
         animations.put("ATTACK", crearAnimacion(sheet, filaAttack, framesAttack, cols, filas, 0.1f, Animation.PlayMode.NORMAL));
         animations.put("DEAD", crearAnimacion(sheet, filaDead, framesDead, cols, filas, 0.1f, Animation.PlayMode.NORMAL));
 
@@ -200,6 +210,7 @@ public class Mob extends Entidad {
             isDead = true;
             stateTime = 0;
         }
+        estadoActual = Estado.HURT;
     }
     @Override
     public void dispose() {

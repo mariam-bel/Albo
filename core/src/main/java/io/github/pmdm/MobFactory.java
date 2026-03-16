@@ -8,14 +8,14 @@ public class MobFactory {
         switch (tipo) {
             case SKELETON:
                 // El esqueleto tiene 12 col, 6 filas
-                return new Mob(x, y,comp,min,max,"skeletonBaseOutlineV2-Sheet.png",12, 6, 0, 11,1, 8,2, 10,5, 6,2);
+                return new Mob(x, y,comp,min,max,"skeletonBaseOutlineV2-Sheet.png",12, 6, 0, 11,4,2,1, 8,2, 10,5, 6,2);
 
             case RAT:
                 // La rata tiene 10 col, 7 filas
-                return new Mob(x, y,comp, min, max,"ratBaseV2-Sheet.png",10, 7,0,10,2,3,4,9,6,6,3);
+                return new Mob(x, y,comp, min, max,"ratBaseV2-Sheet.png",10, 7,0,10,5,2,2,3,4,9,6,6,3);
 
             case SLIME:
-                return new Mob(x, y, comp, min, max,"slimeBasicV2-Sheet.png", 12, 7, 0,10, 1,10, 3,12, 6,9, 1);
+                return new Mob(x, y, comp, min, max,"slimeBasicV2-Sheet.png", 12, 7, 0,10, 5,2,1,10, 3,12, 6,9, 1);
             default:
                 return null;
         }
