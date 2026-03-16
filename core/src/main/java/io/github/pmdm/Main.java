@@ -85,9 +85,8 @@ public class Main extends ApplicationAdapter {
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
 
-        Gdx.input.setInputProcessor(menu.stage);
-
         menu = new Menu();
+        Gdx.input.setInputProcessor(menu.stage);
     }
 
     @Override
