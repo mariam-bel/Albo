@@ -62,14 +62,14 @@ public class Menu {
 
         stage.addActor(table);
     }
-
     public boolean isStartPressed() {
         if (startPressed) {
             startPressed = false;
             return true;
         }
         return false;
-    }    public void draw() { stage.act(); stage.draw(); }
+    }
+    public void draw() { stage.act(); stage.draw(); }
     public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
 
     public void dispose() {

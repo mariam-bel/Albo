@@ -17,23 +17,23 @@ import com.badlogic.gdx.utils.Array;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    enum Estado { INICIO, JUGANDO, APUESTA, PELEA_MOBS, FIN_JUEGO }
+
+    enum Estado { INICIO, JUGANDO, APUESTA, PELEA_MOBS, SELECCION_NIVEL, FIN_JUEGO;}
     Estado estadoActual = Estado.INICIO;
-    BitmapFont font;
-    Mob mobApostado;
-    Mob mobGanador;
-    Menu menu;
-    Plataformas suelo;
-    ShapeRenderer shapeRenderer;
+    private Levels menuNiveles;
+    private int nivelActivo = -1;
+    private Menu menu;
+    private ShapeRenderer shapeRenderer;
     public static SpriteBatch batch;
     private Texture background;
-    Personaje prota;
-    Controllers controllers;
-    OrthographicCamera camara;
-    World world;
-    Array<Plataformas> plataformas;
-    Array<Mob> mobs;
-    boolean golpeRealizado = false;
+    private Personaje prota;
+    private Controllers controllers;
+    private OrthographicCamera camara;
+    private World world;
+    private Array<Plataformas> plataformas;
+    private Array<Mob> mobs;
+    private boolean golpeRealizado = false;
+
 
     @Override
     public void create() {
@@ -45,6 +45,7 @@ public class Main extends ApplicationAdapter {
         background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
         font = new BitmapFont();
         font.getData().setScale(2f);
+        menuNiveles = new Levels();
 
         mobs = new Array<>();
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
@@ -86,7 +87,9 @@ public class Main extends ApplicationAdapter {
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
 
         menu = new Menu();
+        levels = new Levels();
         Gdx.input.setInputProcessor(menu.stage);
+        Gdx.input.setInputProcessor(levels.stage);
     }
 
     @Override
@@ -95,6 +98,7 @@ public class Main extends ApplicationAdapter {
         camara = new OrthographicCamera();
         camara.setToOrtho(false, 1000, 480);
         controllers.resize(width, height);
+        menuNiveles.resize(width, height);
     }
 
     public void handleInput() {
@@ -144,69 +148,105 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-        if (estadoActual == Estado.INICIO) {
-            Gdx.gl.glClearColor(0, 0, 0, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-            menu.draw();
+        switch (estadoActual) {
+            case INICIO:
+                menu.draw();
+                if (menu.isStartPressed()) {
+                    estadoActual = Estado.SELECCION_NIVEL;
+                    Gdx.input.setInputProcessor(menuNiveles.stage);
+                }
+                break;
 
-            if (menu.isStartPressed()) {
-                estadoActual = Estado.JUGANDO;
-                Gdx.input.setInputProcessor(controllers.stage);
-            }
-        } else {
-            float deltaTime = Gdx.graphics.getDeltaTime();
-            handleInput();
+            case SELECCION_NIVEL:
+                menuNiveles.draw();
+                if (menuNiveles.isLevelPressed()) {
+                    nivelActivo = menuNiveles.getSelectedLevel();
+                    System.out.println("Nivel seleccionado: " + nivelActivo);
 
-            world.step(1/60f, 6, 2);
+                    // Aquí cambiaremos el background según el nivel
 
-            Gdx.gl.glClearColor(0, 0, 0, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+                    estadoActual = Estado.JUGANDO;
+                    Gdx.input.setInputProcessor(controllers.stage);
+                }
+                break;
+            case JUGANDO:
+                dibujarNivel(nivelActivo);
+                break;
+        }
+    }
+    private void dibujarNivel(int nivelActivo) {
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        handleInput();
 
-            Array<Rectangle> colisiones = new Array<>();
-            for (Plataformas p : plataformas) {
-                colisiones.add(p.getBounds());
-            }
+        world.step(1/60f, 6, 2);
 
-            for (Mob m: mobs) {
-                m.updateIA(deltaTime, prota.getPosition(), colisiones);
-            }
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-            prota.update(deltaTime, colisiones, plataformas);
-            if (prota.shouldRemove()) {
-                volverAlMenu();
-                return;
-            }
+        Array<Rectangle> colisiones = new Array<>();
+        for (Plataformas p : plataformas) {
+            colisiones.add(p.getBounds());
+        }
 
-            for (Mob m: mobs){
-                if (m.isAttacking()) {
-                    if (m.getAttackBox().overlaps(prota.getBounds())) {
-                        if (!prota.isHurt() && !prota.isDead()) {
-                            prota.quitarVida(1);
-                            controllers.actualizarVidas(prota.getVidas());
-                            if (prota.getVidas() <= 0) {
-                                prota.setDead(true);
-                            }
+        for (Mob m: mobs) {
+            m.updateIA(deltaTime, prota.getPosition(), colisiones);
+        }
+
+        prota.update(deltaTime, colisiones, plataformas);
+        if (prota.shouldRemove()) {
+            volverAlMenu();
+            return;
+        }
+
+        for (Mob m: mobs){
+            if (m.isAttacking()) {
+                if (m.getAttackBox().overlaps(prota.getBounds())) {
+                    if (!prota.isHurt() && !prota.isDead()) {
+                        prota.quitarVida(1);
+                        controllers.actualizarVidas(prota.getVidas());
+                        if (prota.getVidas() <= 0) {
+                            prota.setDead(true);
                         }
-                        if (prota.isHurt()) {
-                            prota.quitarVida(0);
-                        }
+                    }
+                    if (prota.isHurt()) {
+                        prota.quitarVida(0);
                     }
                 }
             }
+        }
+
+        actualizarCamara();
+
+        batch.setProjectionMatrix(camara.combined);
+        batch.begin();
+
+        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        for (Mob m: mobs) { if (!m.shouldRemove()) m.draw(batch); }
+        if (!prota.shouldRemove()) prota.draw(batch);
+        for (Plataformas p : plataformas) p.draw(batch);
+
+        batch.end();
+
+        controllers.stage.act(deltaTime);
+        controllers.update(deltaTime);
+        controllers.draw();
 
 
-            checkAttack();
+        checkAttack();
 
-            camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
-            camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
-            camara.position.x = MathUtils.clamp(prota.getPosition().x, camara.viewportWidth/2, Gdx.graphics.getWidth() - camara.viewportWidth/2);
-            camara.position.y = MathUtils.clamp(prota.getPosition().y, camara.viewportHeight/2, Gdx.graphics.getHeight() - camara.viewportHeight/2);
-            camara.update();
+        camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
+        camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
+        camara.position.x = MathUtils.clamp(prota.getPosition().x, camara.viewportWidth/2, Gdx.graphics.getWidth() - camara.viewportWidth/2);
+        camara.position.y = MathUtils.clamp(prota.getPosition().y, camara.viewportHeight/2, Gdx.graphics.getHeight() - camara.viewportHeight/2);
+        camara.update();
 
-            batch.setProjectionMatrix(camara.combined);
-            batch.begin();
-            batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.setProjectionMatrix(camara.combined);
+        batch.begin();
+        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         for (Mob m: mobs) {
             if (!m.shouldRemove()) {
@@ -246,16 +286,25 @@ public class Main extends ApplicationAdapter {
 //            }
 //            shapeRenderer.end();
 
-            controllers.stage.act(deltaTime);
-            controllers.update(deltaTime);
-            controllers.draw();
-        }
+        controllers.stage.act(deltaTime);
+        controllers.update(deltaTime);
+        controllers.draw();
+    }
+
+    private void actualizarCamara() {
+        camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
+        camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
+        camara.position.x = MathUtils.clamp(camara.position.x, camara.viewportWidth/2, 2500 - camara.viewportWidth/2);
+        camara.position.y = MathUtils.clamp(camara.position.y, camara.viewportHeight/2, 2000 - camara.viewportHeight/2);
+        camara.update();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
         background.dispose();
+        if (menuNiveles != null) menuNiveles.dispose();
+        if (menu != null) menu.dispose();
         for (Mob m: mobs) {
             m.dispose();
         }
@@ -263,5 +312,6 @@ public class Main extends ApplicationAdapter {
             p.dispose();
         }
         shapeRenderer.dispose();
+        menuNiveles.dispose();
     }
 }
