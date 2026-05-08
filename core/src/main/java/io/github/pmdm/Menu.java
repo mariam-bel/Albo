@@ -69,7 +69,7 @@ public class Menu {
         }
         return false;
     }
-    public void draw() { stage.act(); stage.draw(); }
+    public void draw() { stage.act(Gdx.graphics.getDeltaTime()); stage.draw(); }
     public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
 
     public void dispose() {

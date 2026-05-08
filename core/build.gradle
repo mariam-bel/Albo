@@ -44,7 +44,8 @@ dependencies {
   api "games.rednblack.miniaudio:miniaudio:$miniaudioVersion"
   api "org.apache.commons:commons-collections4:$commonsCollectionsVersion"
 
-    if(enableGraalNative == 'true') {
+
+  if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }
 }

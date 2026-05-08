@@ -1,82 +1,64 @@
 package io.github.pmdm;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class Levels {
     public Stage stage;
-    private Texture spriteSheet;
-
+    private Texture fondoMapa, puntoTextura;
+    private Image iconoMapa;
     private boolean levelPressed = false;
-    private int selectedLevel = -1; // -1 significa ningún nivel seleccionado
+    private int selectedLevel = -1;
 
     public Levels() {
         stage = new Stage(new FitViewport(1000, 480, new OrthographicCamera()), Main.batch);
 
-        spriteSheet = new Texture("nivelesAlbo.png");
+        // 1. Cargamos el mapa completo como fondo
+        fondoMapa = new Texture("nivelesAlbo.png");
+        Image fondo = new Image(fondoMapa);
+        fondo.setFillParent(true);
+        stage.addActor(fondo);
 
-        TextureRegion [][] regions = TextureRegion.split(spriteSheet,
-            spriteSheet.getWidth() / 3,
-            spriteSheet.getHeight() / 3);
+        // 2. Icono que representa al jugador en el mapa
+        puntoTextura = new Texture(Gdx.files.internal("punto-mapa.png"));
+        iconoMapa = new Image(puntoTextura);
+        iconoMapa.setSize(40, 40);
+        iconoMapa.setOrigin(20, 20);
+        // Posición inicial: esquina inferior izquierda
+        iconoMapa.setPosition(80, 50);
+        stage.addActor(iconoMapa);
+    }
 
-        TextureRegion [][] levels = new TextureRegion[3][3];
+    public void iniciarTrayecto(final int nivel) {
+        levelPressed = false;
+        selectedLevel = -1;
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                levels[i][j] = regions[i][j];
-            }
+        if (nivel == 1) {
+            // Animación hacia el Pueblo Fantasma (NIVEL 1)
+            iconoMapa.setPosition(80, 50); // Reset a la entrada
+            iconoMapa.addAction(Actions.sequence(
+                Actions.delay(0.5f),
+                // Seguimos el camino curvo
+                Actions.moveTo(120, 80, 1.0f, Interpolation.linear),
+                Actions.moveTo(160, 130, 1.0f, Interpolation.linear),
+                Actions.moveTo(200, 175, 1.0f, Interpolation.pow2Out),
+                Actions.delay(0.5f),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        selectedLevel = 1;
+                        levelPressed = true;
+                    }
+                })
+            ));
         }
-
-        Image btnLevel1 = new Image(new TextureRegionDrawable(levels[0][0]));
-        btnLevel1.setSize(50,50);
-        btnLevel1.addListener(new InputListener(){
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                selectedLevel = 1;
-                levelPressed = true;
-                return true;
-            }
-        });
-
-        Image btnLevel2 = new Image(new TextureRegionDrawable(levels[0][1]));
-        btnLevel2.addListener(new InputListener(){
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                selectedLevel = 2;
-                levelPressed = true;
-                return true;
-            }
-        });
-
-
-        Image btnLevel3 = new Image(new TextureRegionDrawable(levels[0][2]));
-        btnLevel3.addListener(new InputListener(){
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                selectedLevel = 3;
-                levelPressed = true;
-                return true;
-            }
-        });
-
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
-
-        table.add(btnLevel1).size(300, 120).pad(10);
-        table.add(btnLevel2).size(300, 120).pad(10);
-        table.add(btnLevel3).size(300, 120).pad(10);
-
-        stage.addActor(table);
-
+        // Aquí añadiremos más niveles en el futuro (nivel == 2, etc.)
     }
 
     public int getSelectedLevel() {
@@ -90,12 +72,22 @@ public class Levels {
     public void reset() {
         levelPressed = false;
         selectedLevel = -1;
+        iconoMapa.setPosition(80, 50);
+        iconoMapa.clearActions();
     }
-    public void draw() { stage.act(); stage.draw(); }
-    public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
+
+    public void draw() {
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
+    }
+
+    public void resize(int w, int h) {
+        stage.getViewport().update(w, h, true);
+    }
 
     public void dispose() {
         stage.dispose();
-        spriteSheet.dispose();
+        fondoMapa.dispose();
+        puntoTextura.dispose();
     }
 }

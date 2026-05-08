@@ -41,23 +41,44 @@ public class Main extends ApplicationAdapter {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         world = new World(new Vector2(0,-10), true);
+
         menu = new Menu();
-        background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
-        font = new BitmapFont();
-        font.getData().setScale(2f);
         menuNiveles = new Levels();
 
+        background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
+
+        camara = new OrthographicCamera();
+        camara.setToOrtho(false, 1000, 480);
+
         mobs = new Array<>();
+        plataformas = new Array<>();
+        cargarEntidadesNivel();
+
+        controllers = new Controllers();
+        prota = new Personaje(100, 1650);
+
+        Gdx.input.setInputProcessor(menu.stage);
+
+    }
+
+    private void volverAlMenu() {
+        estadoActual = Estado.INICIO;
+        prota = new Personaje(100, 1650);
+        cargarEntidadesNivel();
+
+        menuNiveles.reset();
+        Gdx.input.setInputProcessor(menu.stage);
+    }
+
+    private void cargarEntidadesNivel() {
+        mobs.clear();
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
         mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
 
-
-        prota = new Personaje(100, 1650);
-
-        plataformas = new Array<>();
+        plataformas.clear();
         plataformas.add(new Plataformas(2340, 1, 70, 100 , false));
         plataformas.add(new Plataformas(2200, 1, 175, 60 , false));
         plataformas.add(new Plataformas(1500, 300, 30, 100, true));
@@ -69,34 +90,12 @@ public class Main extends ApplicationAdapter {
         plataformas.add(new Plataformas(1820, 500, 1500, 100, false));
         plataformas.add(new Plataformas(1875, 600, 100, 38, true));
         plataformas.add(new Plataformas(0, 0, 2500, 1, false));
-        controllers = new Controllers();
-
-        Gdx.input.setInputProcessor(menu.stage);
-    }
-
-    private void volverAlMenu() {
-        estadoActual = Estado.INICIO;
-
-        prota = new Personaje(100, 1650);
-
-        mobs.clear();
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
-        mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
-
-        menu = new Menu();
-        levels = new Levels();
-        Gdx.input.setInputProcessor(menu.stage);
-        Gdx.input.setInputProcessor(levels.stage);
     }
 
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
-        camara = new OrthographicCamera();
-        camara.setToOrtho(false, 1000, 480);
+        menu.resize(width, height);
         controllers.resize(width, height);
         menuNiveles.resize(width, height);
     }
@@ -157,26 +156,82 @@ public class Main extends ApplicationAdapter {
                 if (menu.isStartPressed()) {
                     estadoActual = Estado.SELECCION_NIVEL;
                     Gdx.input.setInputProcessor(menuNiveles.stage);
+                    menuNiveles.iniciarTrayecto(1); // Iniciamos la animación al primer nivel
                 }
                 break;
 
             case SELECCION_NIVEL:
                 menuNiveles.draw();
+
                 if (menuNiveles.isLevelPressed()) {
                     nivelActivo = menuNiveles.getSelectedLevel();
-                    System.out.println("Nivel seleccionado: " + nivelActivo);
-
-                    // Aquí cambiaremos el background según el nivel
-
                     estadoActual = Estado.JUGANDO;
+
+                    // Cambiamos el procesador de entrada a los controles del juego
                     Gdx.input.setInputProcessor(controllers.stage);
+
+                    cargarEntidadesNivel();
                 }
                 break;
+
             case JUGANDO:
-                dibujarNivel(nivelActivo);
+                actualizarLogicaJuego();
+                dibujarJuego();
                 break;
         }
+
     }
+
+    private void dibujarJuego() {
+        batch.setProjectionMatrix(camara.combined);
+        batch.begin();
+
+        // Fondo --> Cambiar el texture según nivelActivo
+        batch.draw(background, 0, 0, 2500, 2000);
+
+        for (Plataformas p : plataformas) p.draw(batch);
+        for (Mob m: mobs) if (!m.shouldRemove()) m.draw(batch);
+        if (!prota.shouldRemove()) prota.draw(batch);
+
+        batch.end();
+
+        controllers.draw();
+
+    }
+
+    private void actualizarLogicaJuego() {
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        handleInput();
+        world.step(1/60f, 6, 2);
+
+        Array<Rectangle> colisiones = new Array<>();
+        for (Plataformas p : plataformas) colisiones.add(p.getBounds());
+
+        for (Mob m: mobs) m.updateIA(deltaTime, prota.getPosition(), colisiones);
+
+        prota.update(deltaTime, colisiones, plataformas);
+
+        if (prota.shouldRemove()) {
+            volverAlMenu();
+            return;
+        }
+
+        for (Mob m: mobs){
+            if (m.isAttacking() && m.getAttackBox().overlaps(prota.getBounds())) {
+                if (!prota.isHurt() && !prota.isDead()) {
+                    prota.quitarVida(1);
+                    controllers.actualizarVidas(prota.getVidas());
+                    if (prota.getVidas() <= 0) prota.setDead(true);
+                }
+            }
+        }
+
+        checkAttack();
+        actualizarCamara();
+        controllers.stage.act(deltaTime);
+        controllers.update(deltaTime);
+    }
+
     private void dibujarNivel(int nivelActivo) {
         float deltaTime = Gdx.graphics.getDeltaTime();
         handleInput();
@@ -294,6 +349,7 @@ public class Main extends ApplicationAdapter {
     private void actualizarCamara() {
         camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
         camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
+
         camara.position.x = MathUtils.clamp(camara.position.x, camara.viewportWidth/2, 2500 - camara.viewportWidth/2);
         camara.position.y = MathUtils.clamp(camara.position.y, camara.viewportHeight/2, 2000 - camara.viewportHeight/2);
         camara.update();
@@ -303,15 +359,10 @@ public class Main extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         background.dispose();
-        if (menuNiveles != null) menuNiveles.dispose();
-        if (menu != null) menu.dispose();
-        for (Mob m: mobs) {
-            m.dispose();
-        }
-        for (Plataformas p : plataformas) {
-            p.dispose();
-        }
         shapeRenderer.dispose();
+        menu.dispose();
         menuNiveles.dispose();
+        for (Mob m: mobs) m.dispose();
+        for (Plataformas p : plataformas) p.dispose();
     }
 }

@@ -191,7 +191,7 @@ public class Controllers {
         return false;
     }
     public void setSaltar(boolean saltar) { this.saltar = saltar; }
-    public void resize(int width, int height) { viewport.update(width, height); }
+    public void resize(int width, int height) { viewport.update(width, height, true); }
     public boolean isAtacar() { return atacar; }
     public void setAtacar(boolean atacar) { this.atacar = atacar; }
     public void dispose() {
