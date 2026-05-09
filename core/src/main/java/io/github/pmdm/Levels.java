@@ -41,13 +41,13 @@ public class Levels {
 
         if (nivel == 1) {
             // Animación hacia el Pueblo Fantasma (NIVEL 1)
-            iconoMapa.setPosition(80, 50); // Reset a la entrada
+            iconoMapa.setPosition(140, 50); // Reset a la entrada
             iconoMapa.addAction(Actions.sequence(
-                Actions.delay(0.5f),
+                Actions.delay(0.7f),
                 // Seguimos el camino curvo
-                Actions.moveTo(120, 80, 1.0f, Interpolation.linear),
-                Actions.moveTo(160, 130, 1.0f, Interpolation.linear),
-                Actions.moveTo(200, 175, 1.0f, Interpolation.pow2Out),
+                Actions.moveTo(180, 80, 1.0f, Interpolation.linear),
+                Actions.moveTo(215, 100, 1.0f, Interpolation.linear),
+                Actions.moveTo(180, 150, 1.0f, Interpolation.pow2Out),
                 Actions.delay(0.5f),
                 Actions.run(new Runnable() {
                     @Override
