@@ -15,7 +15,7 @@ public class Levels {
     private Image iconoMapa;
     private boolean levelPressed = false;
     private int selectedLevel = -1;
-
+    private float lastX = 80, lastY = 50;
     public Levels() {
         stage = new Stage(new FitViewport(1000, 480, new OrthographicCamera()), Main.batch);
 
@@ -46,8 +46,8 @@ public class Levels {
                 Actions.delay(0.7f),
                 // Seguimos el camino curvo
                 Actions.moveTo(180, 80, 1.0f, Interpolation.linear),
-                Actions.moveTo(215, 100, 1.0f, Interpolation.linear),
-                Actions.moveTo(180, 150, 1.0f, Interpolation.pow2Out),
+                Actions.moveTo(215, 110, 1.0f, Interpolation.linear),
+                Actions.moveTo(180, 130, 1.0f, Interpolation.pow2Out),
                 Actions.delay(0.5f),
                 Actions.run(new Runnable() {
                     @Override

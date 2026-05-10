@@ -165,11 +165,9 @@ public class Main extends ApplicationAdapter {
 
                 if (menuNiveles.isLevelPressed()) {
                     nivelActivo = menuNiveles.getSelectedLevel();
+                    cargarFondoNivel(nivelActivo); // <-- CAMBIO DE FONDO AQUÍ
                     estadoActual = Estado.JUGANDO;
-
-                    // Cambiamos el procesador de entrada a los controles del juego
                     Gdx.input.setInputProcessor(controllers.stage);
-
                     cargarEntidadesNivel();
                 }
                 break;
@@ -197,6 +195,15 @@ public class Main extends ApplicationAdapter {
 
         controllers.draw();
 
+    }
+    private void cargarFondoNivel(int nivel) {
+        if (background != null) background.dispose(); // Liberar memoria del fondo anterior
+
+        if (nivel == 1) {
+            background = new Texture(Gdx.files.internal("nivel-1.png"));
+        } else if (nivel == 2) {
+            background = new Texture(Gdx.files.internal("fondoOpt2.jpeg")); // O el que corresponda
+        }
     }
 
     private void actualizarLogicaJuego() {
@@ -226,10 +233,24 @@ public class Main extends ApplicationAdapter {
             }
         }
 
+        if (mobs.size == 0 && prota.getPosition().x > 2200) {
+            avanzarAlSiguienteNivel();
+        }
+
         checkAttack();
         actualizarCamara();
         controllers.stage.act(deltaTime);
         controllers.update(deltaTime);
+    }
+    private void avanzarAlSiguienteNivel() {
+        estadoActual = Estado.SELECCION_NIVEL;
+        Gdx.input.setInputProcessor(menuNiveles.stage);
+
+        if (nivelActivo == 1) {
+            menuNiveles.iniciarTrayecto(2);
+        } else {
+            volverAlMenu();
+        }
     }
 
     private void dibujarNivel(int nivelActivo) {
