@@ -32,6 +32,7 @@ public class Mob extends Entidad {
         isHurt = hurt;
     }
 
+    //Necesitamos crear un nuevo comportamiento: 'ESTÁTICO'
     public enum Comportamiento { PATRULLA, PERSECUCION }
     private Comportamiento comportamiento;
 

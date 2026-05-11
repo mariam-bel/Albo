@@ -2,7 +2,7 @@ package io.github.pmdm;
 
 public class MobFactory {
 
-    public enum TipoMob { SKELETON, RAT, SLIME }
+    public enum TipoMob { SKELETON, RAT, SLIME, FANTASMA, HONGO }
 
     public static Mob crearMob(TipoMob tipo, float x, float y, Mob.Comportamiento comp, float min, float max) {
         switch (tipo) {
@@ -16,6 +16,10 @@ public class MobFactory {
 
             case SLIME:
                 return new Mob(x, y, comp, min, max,"slimeBasicV2-Sheet.png", 12, 7, 0,10, 5,2,1,10, 3,12, 6,9, 1);
+            case FANTASMA:
+                return new Mob(x, y, comp, min, max,"fantasma.png", 6, 6, 0,6, 4,5,1,6, 2,6, 5,4, 1);
+            case HONGO:
+                return new Mob(x, y, comp, min, max,"hongo.png", 8, 7, 0,8, 4,5,1,7, 2,8, 5,8, 3);
             default:
                 return null;
         }
