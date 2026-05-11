@@ -8,7 +8,7 @@ public class MobFactory {
         switch (tipo) {
             case SKELETON:
                 // El esqueleto tiene 12 col, 6 filas
-                return new Mob(x, y,comp,min,max,"skeletonBaseOutlineV2-Sheet.png",12, 6, 0, 11,4,2,1, 8,2, 10,5, 6,2, true);
+                return new Mob(x, y,comp,min,max,"skeletonBaseV2-Sheet.png",12, 6, 0, 11,4,2,1, 8,2, 10,5, 6,2, true);
 
             case RAT:
                 // La rata tiene 10 col, 7 filas
