@@ -32,8 +32,16 @@ public class Mob extends Entidad {
         isHurt = hurt;
     }
 
+    public boolean isTerrestre() {
+        return terrestre;
+    }
+
+    public void setTerrestre(boolean terrestre) {
+        this.terrestre = terrestre;
+    }
+
     //Necesitamos crear un nuevo comportamiento: 'ESTÁTICO'
-    public enum Comportamiento { PATRULLA, PERSECUCION }
+    public enum Comportamiento { PATRULLA, PERSECUCION, ESTATICO }
     private Comportamiento comportamiento;
 
     private float minX, maxX;
@@ -44,8 +52,9 @@ public class Mob extends Entidad {
     private float attackRangeX = 80;
     private float attackRangeY = 60;
     private int vida;
+    private boolean terrestre;
 
-    public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle,int filaHurt, int framesHurt, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead, int vidas) {
+    public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle, int filaHurt, int framesHurt, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead, int vidas, boolean terricola) {
         super(x, y);
         this.sheet = new Texture(path);
         this.attackBox = new Rectangle();
@@ -54,6 +63,7 @@ public class Mob extends Entidad {
         this.maxX = maxX;
         this.facingRight = false;
         this.vida=vidas;
+        terrestre = terricola;
 
         // Configuración de las animaciones estándar de los Mobs
         animations.put("IDLE", crearAnimacion(sheet, filaIdle, framesIdle, cols, filas, 0.1f, Animation.PlayMode.LOOP));
@@ -110,7 +120,7 @@ public class Mob extends Entidad {
                 } else {
                     velocityV.x = 0;
                 }
-            } else {
+            } else if (comportamiento == Comportamiento.PATRULLA) { // <-- Cambiado a else if
                 if (facingRight) {
                     velocityV.x = velocidad;
                     if (position.x >= maxX) facingRight = false;
@@ -118,7 +128,11 @@ public class Mob extends Entidad {
                     velocityV.x = -velocidad;
                     if (position.x <= minX) facingRight = true;
                 }
+            } else if (comportamiento == Comportamiento.ESTATICO) { // <-- Nueva lógica limpia
+                velocityV.x = 0;
+                facingRight = (posProtagonista.x > position.x);
             }
+
             if (velocityV.x != 0) {
                 estadoActual = Estado.WALK;
             } else {
@@ -169,8 +183,12 @@ public class Mob extends Entidad {
                 }
             }
         }
-        if (!grounded) {
-            velocityV.y -= 1000f * delta;
+        if (comportamiento != Comportamiento.ESTATICO || isTerrestre()) {
+            if (!grounded) {
+                velocityV.y -= 1000f * delta;
+            }
+        } else {
+            velocityV.y = 0; // Se mantiene flotando si es estático y no queremos gravedad
         }
 
         sprite.setPosition(position.x, position.y);
