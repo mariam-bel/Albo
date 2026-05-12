@@ -20,7 +20,7 @@ public class Main extends ApplicationAdapter {
 
     enum Estado { INICIO, JUGANDO, APUESTA, PELEA_MOBS, SELECCION_NIVEL, FIN_JUEGO;}
     Estado estadoActual = Estado.INICIO;
-    private Levels menuNiveles;
+    //private Levels menuNiveles;
     private int nivelActivo = -1;
     private Menu menu;
     private ShapeRenderer shapeRenderer;
@@ -43,7 +43,7 @@ public class Main extends ApplicationAdapter {
         world = new World(new Vector2(0,-10), true);
 
         menu = new Menu();
-        menuNiveles = new Levels();
+        //menuNiveles = new Levels();
 
         background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
 
@@ -66,7 +66,7 @@ public class Main extends ApplicationAdapter {
         prota = new Personaje(100, 1650);
         cargarEntidadesNivel();
 
-        menuNiveles.reset();
+        //menuNiveles.reset();
         Gdx.input.setInputProcessor(menu.stage);
     }
 
@@ -109,7 +109,7 @@ public class Main extends ApplicationAdapter {
         super.resize(width, height);
         menu.resize(width, height);
         controllers.resize(width, height);
-        menuNiveles.resize(width, height);
+        //menuNiveles.resize(width, height);
     }
 
     public void handleInput() {
@@ -166,6 +166,21 @@ public class Main extends ApplicationAdapter {
             case INICIO:
                 menu.draw();
                 if (menu.isStartPressed()) {
+                    nivelActivo = 1;
+                    cargarFondoNivel(nivelActivo);
+                    cargarEntidadesNivel();
+                    estadoActual = Estado.JUGANDO;
+                    Gdx.input.setInputProcessor(controllers.stage);
+                }
+                break;
+
+            case JUGANDO: // Mueve esto FUERA de los comentarios
+                actualizarLogicaJuego();
+                dibujarJuego();
+                break;
+                /*case INICIO:
+                menu.draw();
+                if (menu.isStartPressed()) {
                     estadoActual = Estado.SELECCION_NIVEL;
                     Gdx.input.setInputProcessor(menuNiveles.stage);
                     menuNiveles.iniciarTrayecto(1); // Iniciamos la animación al primer nivel
@@ -187,7 +202,7 @@ public class Main extends ApplicationAdapter {
             case JUGANDO:
                 actualizarLogicaJuego();
                 dibujarJuego();
-                break;
+                break;*/
         }
 
     }
@@ -246,7 +261,7 @@ public class Main extends ApplicationAdapter {
         }
 
         if (mobs.size == 0 && prota.getPosition().x > 2200) {
-            avanzarAlSiguienteNivel();
+            //avanzarAlSiguienteNivel();
         }
 
         checkAttack();
@@ -254,7 +269,7 @@ public class Main extends ApplicationAdapter {
         controllers.stage.act(deltaTime);
         controllers.update(deltaTime);
     }
-    private void avanzarAlSiguienteNivel() {
+    /*private void avanzarAlSiguienteNivel() {
         estadoActual = Estado.SELECCION_NIVEL;
         Gdx.input.setInputProcessor(menuNiveles.stage);
 
@@ -263,7 +278,7 @@ public class Main extends ApplicationAdapter {
         } else {
             volverAlMenu();
         }
-    }
+    }*/
 
     private void dibujarNivel(int nivelActivo) {
         float deltaTime = Gdx.graphics.getDeltaTime();
@@ -394,7 +409,7 @@ public class Main extends ApplicationAdapter {
         background.dispose();
         shapeRenderer.dispose();
         menu.dispose();
-        menuNiveles.dispose();
+        //menuNiveles.dispose();
         for (Mob m: mobs) m.dispose();
         for (Plataformas p : plataformas) p.dispose();
     }
