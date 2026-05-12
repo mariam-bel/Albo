@@ -174,7 +174,7 @@ public class Main extends ApplicationAdapter {
                 }
                 break;
 
-            case JUGANDO: // Mueve esto FUERA de los comentarios
+            case JUGANDO:
                 actualizarLogicaJuego();
                 dibujarJuego();
                 break;
