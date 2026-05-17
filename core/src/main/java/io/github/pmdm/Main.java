@@ -26,6 +26,8 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     public static SpriteBatch batch;
     private Texture background;
+    private Texture textureArbol, textureFlor, textureArbol2;
+    private Array<Entidad> entidadesRender = new Array<>();
     private Personaje prota;
     private Controllers controllers;
     private OrthographicCamera camara;
@@ -48,7 +50,8 @@ public class Main extends ApplicationAdapter {
         background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
 
         camara = new OrthographicCamera();
-        camara.setToOrtho(false, 1000, 480);
+        // camara.setToOrtho(false, 1000, 480);
+        camara.setToOrtho(false, 2500, 2000); // Vista completa del fondo
 
         mobs = new Array<>();
         plataformas = new Array<>();
@@ -78,6 +81,7 @@ public class Main extends ApplicationAdapter {
             case 1:
                 prota.setPosition(100,1650);
 
+                /*
                 mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
                 mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
                 mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
@@ -85,6 +89,7 @@ public class Main extends ApplicationAdapter {
                 mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
                 mobs.add(MobFactory.crearMob(MobFactory.TipoMob.FANTASMA, 1750, 1200, Mob.Comportamiento.PATRULLA, 560,600));
                 //mobs.add(MobFactory.crearMob(MobFactory.TipoMob.HONGO, 550, 1200, Mob.Comportamiento.ESTATICO, 550,550));
+                */
 
 
                 plataformas.add(new Plataformas(2340, 1, 70, 100 , false));
@@ -206,28 +211,84 @@ public class Main extends ApplicationAdapter {
         }
 
     }
-
     private void dibujarJuego() {
         batch.setProjectionMatrix(camara.combined);
         batch.begin();
 
-        // Fondo --> Cambiar el texture según nivelActivo
+        // 1. DIBUJAMOS EL FONDO (Siempre detrás de todo)
         batch.draw(background, 0, 0, 2500, 2000);
 
+        // 2. PREPARAMOS EL Y-SORT
+        entidadesRender.clear();
+        if (!prota.shouldRemove()) entidadesRender.add(prota);
+        for (Mob m : mobs) if (!m.shouldRemove()) entidadesRender.add(m);
+
+        // Ordenamos: Mayor Y primero (se dibuja antes = queda detrás)
+        // Menor Y al final (se dibuja después = queda delante)
+        entidadesRender.sort((e1, e2) -> Float.compare(e2.getPosition().y, e1.getPosition().y));
+
+        // 3. RENDERIZADO CON PROFUNDIDAD DINÁMICA
+        // Definimos a qué altura (Y) están las bases del árbol y las flores
+        // He puesto 1650 porque es donde empieza tu prota, ajústalo según el suelo del árbol
+        float yBaseArbol = 1660f;
+        float yBaseArbol2 = 1660f;
+        float yBaseFlores = 1640f;
+
+        boolean arbolDibujado = false;
+        boolean arbol2Dibujado = false;
+        boolean floresDibujadas = false;
+
+        if (nivelActivo == 1) {
+            for (Entidad e : entidadesRender) {
+                // Dibujamos el árbol cuando lleguemos a su altura
+                if (!arbolDibujado && e.getPosition().y < yBaseArbol) {
+                    if (textureArbol != null) batch.draw(textureArbol, 950, 350, 1300, 1900);
+                    arbolDibujado = true;
+                }
+                // Dibujamos el segundo árbol (izquierda)
+                if (!arbol2Dibujado && e.getPosition().y < yBaseArbol2) {
+                    if (textureArbol2 != null) batch.draw(textureArbol2, -100, 500, 900, 1400);
+                    arbol2Dibujado = true;
+                }
+                // Dibujamos las flores cuando lleguemos a su altura
+                if (!floresDibujadas && e.getPosition().y < yBaseFlores) {
+                    if (textureFlor != null) batch.draw(textureFlor, 1400, 190, 500, 1000);
+                    floresDibujadas = true;
+                }
+                // Dibujamos la entidad (prota o mob)
+                e.draw(batch);
+            }
+            // Si no hay entidades debajo de los objetos, los dibujamos al final
+            if (!arbolDibujado && textureArbol != null) batch.draw(textureArbol, 950, 350, 1300, 1900);
+            if (!arbol2Dibujado && textureArbol2 != null) batch.draw(textureArbol2, 0, 450, 1100, 1600);
+            if (!floresDibujadas) {
+                if (textureFlor != null) batch.draw(textureFlor, 1400, 190, 500, 1000);
+            }
+        } else {
+            // En otros niveles dibujamos normal
+            for (Entidad e : entidadesRender) e.draw(batch);
+        }
+
         for (Plataformas p : plataformas) p.draw(batch);
-        for (Mob m: mobs) if (!m.shouldRemove()) m.draw(batch);
-        if (!prota.shouldRemove()) prota.draw(batch);
 
         batch.end();
-
         controllers.draw();
-
     }
     private void cargarFondoNivel(int nivel) {
         if (background != null) background.dispose(); // Liberar memoria del fondo anterior
+        if (textureArbol != null) textureArbol.dispose();
+        if (textureFlor != null) textureFlor.dispose();
+        if (textureArbol2 != null) textureArbol2.dispose();
+
+        textureArbol = null;
+        textureFlor = null;
+        textureArbol2 = null;
 
         if (nivel == 1) {
             background = new Texture(Gdx.files.internal("nivel-1.png"));
+            textureArbol = new Texture(Gdx.files.internal("Copilot_20260517_174043.png"));
+            textureFlor = new Texture(Gdx.files.internal("Copilot_20260517_175850.png"));
+            textureArbol2 = new Texture(Gdx.files.internal("Captura de pantalla 2026-05-17 181557.png"));
         } else if (nivel == 2) {
             background = new Texture(Gdx.files.internal("fondoOpt2.jpeg")); // O el que corresponda
         }
@@ -395,18 +456,24 @@ public class Main extends ApplicationAdapter {
     }
 
     private void actualizarCamara() {
+        /*
         camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
         camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
 
         camara.position.x = MathUtils.clamp(camara.position.x, camara.viewportWidth/2, 2500 - camara.viewportWidth/2);
         camara.position.y = MathUtils.clamp(camara.position.y, camara.viewportHeight/2, 2000 - camara.viewportHeight/2);
+        */
+        camara.position.set(2500/2f, 2000/2f, 0);
         camara.update();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        background.dispose();
+        if (background != null) background.dispose();
+        if (textureArbol != null) textureArbol.dispose();
+        if (textureFlor != null) textureFlor.dispose();
+        if (textureArbol2 != null) textureArbol2.dispose();
         shapeRenderer.dispose();
         menu.dispose();
         //menuNiveles.dispose();
