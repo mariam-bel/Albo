@@ -2,6 +2,7 @@ package io.github.pmdm;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -212,8 +213,15 @@ public class Mob extends Entidad {
         this.vidas += MathUtils.random(5, 10);
     }
 
-    @Override public void update(float delta) {}
-    public Rectangle getAttackBox() { return attackBox; }
+    @Override
+    public void update(float delta) {
+        // La lógica de IA se llama desde Main
+    }
+
+    @Override
+    public void draw(SpriteBatch batch) {
+        super.draw(batch);
+    }
     public void setDead(boolean dead) { this.isDead = dead; }
     public boolean isDead() { return isDead; }
     public boolean isAttacking() { return isAttacking; }

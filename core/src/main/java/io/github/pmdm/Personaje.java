@@ -12,41 +12,28 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Personaje extends Entidad {
-    private Animation<TextureRegion> walkAnimation, jumpAnimation, attackAnimation, attack2Animation, idleAnimation, hurtAnimation, deadAnimation;
     private Texture protaImg;
-    private Sprite protaSprite;
-    public Vector2 position, velocidad;
-    private float stateTime, gravedad;
     private final float FRAME_DURATION = 0.1f;
     boolean suelo, isJumping;
-
-    enum Estado {IDLE, WALK, JUMP, ATTACK, HURT, DEAD}
-    private Estado estadoActual;
-    private Estado estadoAnterior;
 
     private boolean isAttacking = false;
     private boolean isDead = false;
     private boolean isHurt = false;
     float attackTimer = 0;
-    Rectangle bounds;
     private Rectangle hurtBox, attackBox;
-    boolean facingRight = true;
 
     int saltos = 0;
     int numSaltos = 2;
 
     private float hurtTimer = 0;
-    private final float HURT_DURATION = FRAME_DURATION * 8;
     private int vidas = 3;
     boolean eliminar=false;
     private boolean isInvulnerable = false;
     private float invulnerableTimer = 0f;
     private final float INVULNERABLE_DURATION = 1.5f;
+    private float gravedad;
     public Personaje(float inicioX, float inicioY) {
-        super( 10, 0.2f);
-
-        position = new Vector2(inicioX, inicioY);
-        velocidad = new Vector2();
+        super(inicioX, inicioY);
 
         hurtBox = new Rectangle(inicioX, inicioY, 120, 140);
         attackBox = new Rectangle();
@@ -58,26 +45,16 @@ public class Personaje extends Entidad {
         int frameHeight = protaImg.getHeight() / filas;
         TextureRegion[][] regions = TextureRegion.split(protaImg, frameWidth, frameHeight);
 
-        // IDLE (fila 0)
-        idleAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 0, 0,6), Animation.PlayMode.LOOP);
-        // WALK (fila 1)
-        walkAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 1, 1,8), Animation.PlayMode.LOOP);
-        // JUMP (fila 4)
-        jumpAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 4, 4,6), Animation.PlayMode.NORMAL);
-        // ATTACK (fila 3)
-        //attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 3, 3,7), Animation.PlayMode.NORMAL);
-       // ATTACK 2 (filas 9 y 10)
-        attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 9, 10,10), Animation.PlayMode.NORMAL);
-        // HURT (fila 7)
-        hurtAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 7,7, 4), Animation.PlayMode.LOOP);
-        // DEAD (fila 6)
-        deadAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 6, 6,10), Animation.PlayMode.NORMAL);
+        // Cargamos todas las animaciones en el mapa heredado de Entidad
+        animations.put("IDLE", new Animation<>(FRAME_DURATION, getFrames(regions, 0, 0, 6), Animation.PlayMode.LOOP));
+        animations.put("WALK", new Animation<>(FRAME_DURATION, getFrames(regions, 1, 1, 8), Animation.PlayMode.LOOP));
+        animations.put("JUMP", new Animation<>(FRAME_DURATION, getFrames(regions, 4, 4, 6), Animation.PlayMode.NORMAL));
+        animations.put("ATTACK", new Animation<>(FRAME_DURATION, getFrames(regions, 9, 10, 10), Animation.PlayMode.NORMAL));
+        animations.put("HURT", new Animation<>(FRAME_DURATION, getFrames(regions, 7, 7, 4), Animation.PlayMode.LOOP));
+        animations.put("DEAD", new Animation<>(FRAME_DURATION, getFrames(regions, 6, 6, 10), Animation.PlayMode.NORMAL));
 
-        protaSprite = new Sprite(regions[0][0]);
-        protaSprite.setSize(100, 100);
-
-        estadoActual = Estado.IDLE;
-        estadoAnterior = Estado.IDLE;
+        this.estadoActual = Entidad.Estado.IDLE;
+        this.estadoAnterior = Entidad.Estado.IDLE;
         suelo = true;
         gravedad = 1000f;
 
@@ -110,7 +87,8 @@ public class Personaje extends Entidad {
     public void attack() {
         if (!isAttacking) {
             isAttacking = true;
-            attackTimer = attackAnimation.getAnimationDuration();
+            Animation<TextureRegion> attackAnim = animations.get("ATTACK");
+            if (attackAnim != null) attackTimer = attackAnim.getAnimationDuration();
             stateTime = 0;
         }
     }
@@ -196,8 +174,8 @@ public class Personaje extends Entidad {
                 }
             }
 
-            position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth()+50);
-            position.y = MathUtils.clamp(position.y, 0, Gdx.graphics.getHeight() - protaSprite.getHeight()+20);
+            position.x = MathUtils.clamp(position.x, 0, 2500);
+            position.y = MathUtils.clamp(position.y, 0, 2000);
             if (position.y <= 0) {
                 position.y = 0;
                 velocidad.y = 0;
@@ -227,7 +205,7 @@ public class Personaje extends Entidad {
             }
 
             if (isAttacking) {
-                attackBox.set(facingRight ? position.x + protaSprite.getWidth() - 60 : position.x - 60, position.y, 60, 80);
+                attackBox.set(facingRight ? position.x + 40 : position.x - 60, position.y, 60, 80);
             } else {
                 attackBox.set(0, 0, 0, 0);
             }
@@ -242,30 +220,12 @@ public class Personaje extends Entidad {
 
             if (estadoActual != estadoAnterior) stateTime = 0;
 
-            TextureRegion currentFrame = switch (estadoActual) {
-                case WALK -> walkAnimation.getKeyFrame(stateTime);
-                case JUMP -> jumpAnimation.getKeyFrame(stateTime);
-                case ATTACK -> attackAnimation.getKeyFrame(stateTime);
-                case HURT -> hurtAnimation.getKeyFrame(stateTime);
-                default -> idleAnimation.getKeyFrame(stateTime);
-            };
-
-            protaSprite.setRegion(currentFrame);
-            protaSprite.setFlip(!facingRight, false);
-
-            if (!facingRight) protaSprite.setPosition(position.x - 25, position.y - 15);
-            else protaSprite.setPosition(position.x - 35, position.y - 15);
-            float hitboxOffsetY = 0;
-
-            if (estadoActual == Estado.JUMP) {
-                hitboxOffsetY = 10f;
-            }
-
-            bounds.setPosition(position.x, position.y + hitboxOffsetY);
-            hurtBox.setPosition(position.x, position.y + hitboxOffsetY);
-        }else {
-            protaSprite.setRegion(deadAnimation.getKeyFrame(stateTime));
-            if (deadAnimation.isAnimationFinished(stateTime)) {
+            // La lógica de dibujo ahora la gestiona Entidad.draw(batch)
+            // Aquí solo actualizamos la posición de las hitboxes
+            bounds.setPosition(position.x, position.y);
+            hurtBox.setPosition(position.x, position.y);
+        } else {
+            if (animations.get("DEAD").isAnimationFinished(stateTime)) {
                 eliminar = true;
             }
         }
@@ -273,14 +233,8 @@ public class Personaje extends Entidad {
 
     @Override
     public void draw(SpriteBatch batch) {
-
-        if (isInvulnerable) {
-            if ((int)(invulnerableTimer * 10) % 2 == 0) {
-                return;
-            }
-        }
-
-        protaSprite.draw(batch);
+        if (isInvulnerable && (int)(invulnerableTimer * 10) % 2 == 0) return;
+        super.draw(batch); // Usa Y-Sort y Escala dinámica
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -78,14 +79,33 @@ public abstract class Entidad {
         }
     }
 
+    public float getDynamicScale() {
+        // FÓRMULA DE PROFUNDIDAD:
+        // horizonY: el punto más lejano del mapa (ej. 2000)
+        // escalaHorizonte: 0.6f (más pequeño), escalaCerca: 1.1f (más grande)
+        float horizonY = 2000f;
+        float baseScale = 0.7f;
+        float scaleRange = 0.5f;
+
+        // Cuanto mayor es position.y, menor es la escala
+        float scale = baseScale + scaleRange * (1 - (position.y / horizonY));
+        return MathUtils.clamp(scale, 0.5f, 1.2f);
+    }
+
     public void draw(SpriteBatch batch) {
         Animation<TextureRegion> anim = animations.get(estadoActual.name(), animations.get("IDLE"));
-        TextureRegion currentFrame = anim.getKeyFrame(stateTime);
+        if (anim == null) return;
 
-        sprite.setRegion(currentFrame);
-        sprite.setFlip(!facingRight, false);
-        sprite.setPosition(position.x, position.y);
-        sprite.draw(batch);
+        TextureRegion currentFrame = anim.getKeyFrame(stateTime);
+        float scale = getDynamicScale();
+
+        float drawWidth = currentFrame.getRegionWidth() * scale;
+        float drawHeight = currentFrame.getRegionHeight() * scale;
+
+        // Dibujamos centrado en X y apoyado en la base Y (los pies)
+        batch.draw(currentFrame,
+            position.x - drawWidth / 2f, position.y,
+            drawWidth, drawHeight);
     }
 
     public abstract void update(float delta);
