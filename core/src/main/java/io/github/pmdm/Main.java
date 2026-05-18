@@ -26,7 +26,7 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     public static SpriteBatch batch;
     private Texture background;
-    private Texture textureArbol, textureFlor, textureArbol2;
+    private Texture textureArbol, textureFlor, textureArbol2, textureEscaleras, texturePiedra, texturePuesto;
     private Array<Entidad> entidadesRender = new Array<>();
     private Personaje prota;
     private Controllers controllers;
@@ -39,29 +39,29 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
-
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         world = new World(new Vector2(0,-10), true);
 
         menu = new Menu();
-        //menuNiveles = new Levels();
 
-        background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
+        // CORRECCIÓN 1: Usar nivel-1.png que sí existe
+        background = new Texture(Gdx.files.internal("nivel-1.png"));
 
         camara = new OrthographicCamera();
-        // camara.setToOrtho(false, 1000, 480);
-        camara.setToOrtho(false, 2500, 2000); // Vista completa del fondo
+        camara.setToOrtho(false, 2500, 2000);
 
         mobs = new Array<>();
         plataformas = new Array<>();
-        cargarEntidadesNivel();
 
+        // CORRECCIÓN 2: Crear al prota ANTES de cargar las entidades del nivel
         controllers = new Controllers();
         prota = new Personaje(100, 1650);
 
-        Gdx.input.setInputProcessor(menu.stage);
+        nivelActivo = 1;
+        cargarEntidadesNivel();
 
+        Gdx.input.setInputProcessor(menu.stage);
     }
 
     private void volverAlMenu() {
@@ -122,8 +122,10 @@ public class Main extends ApplicationAdapter {
 
         boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.D)|| Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.A)|| Gdx.input.isKeyPressed(Input.Keys.LEFT);
-        boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
-        boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.W);
+        boolean arriba = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W);
+        boolean abajo = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S);
+        boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
+        boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.INSERT);
 
         if (avanzar) {
             velocidad.x = 500;
@@ -131,6 +133,14 @@ public class Main extends ApplicationAdapter {
             velocidad.x = -500;
         } else {
             velocidad.x = 0;
+            velocidad.y = 0;
+        }
+
+        if (arriba){
+            velocidad.y = 500;
+        }
+        if (abajo) {
+            velocidad.y = -500;
         }
 
         if (saltar) {
@@ -233,10 +243,16 @@ public class Main extends ApplicationAdapter {
         float yBaseArbol = 1660f;
         float yBaseArbol2 = 1660f;
         float yBaseFlores = 1640f;
+        float yBasePuesto = 1650f;
+        float yBasePiedra = 200f;
+        float yBaseEscaleras = 200f;
 
         boolean arbolDibujado = false;
         boolean arbol2Dibujado = false;
         boolean floresDibujadas = false;
+        boolean puestoDibujado = false;
+        boolean piedraDibujada = false;
+        boolean escalerasDibujadas = false;
 
         if (nivelActivo == 1) {
             for (Entidad e : entidadesRender) {
@@ -247,23 +263,39 @@ public class Main extends ApplicationAdapter {
                 }
                 // Dibujamos el segundo árbol (izquierda)
                 if (!arbol2Dibujado && e.getPosition().y < yBaseArbol2) {
-                    if (textureArbol2 != null) batch.draw(textureArbol2, -100, 500, 900, 1400);
+                    if (textureArbol2 != null) batch.draw(textureArbol2, -15, 700, 700, 1400);
                     arbol2Dibujado = true;
+                }
+                // Dibujamos el puesto
+                if (!puestoDibujado && e.getPosition().y < yBasePuesto) {
+                    if (texturePuesto != null) batch.draw(texturePuesto, 960, 450, 250, 390);
+                    puestoDibujado = true;
                 }
                 // Dibujamos las flores cuando lleguemos a su altura
                 if (!floresDibujadas && e.getPosition().y < yBaseFlores) {
                     if (textureFlor != null) batch.draw(textureFlor, 1400, 190, 500, 1000);
                     floresDibujadas = true;
                 }
+                // Dibujamos la piedra
+//                if (!piedraDibujada && e.getPosition().y < yBasePiedra) {
+//                    if (texturePiedra != null) batch.draw(texturePiedra, -100, 150, 100, 300);
+//                    piedraDibujada = true;
+//                }
+                // Dibujamos las escaleras
+                if (!escalerasDibujadas && e.getPosition().y < yBaseEscaleras) {
+                    if (textureEscaleras != null) batch.draw(textureEscaleras, 300, -85, 690, 1000);
+                    escalerasDibujadas = true;
+                }
                 // Dibujamos la entidad (prota o mob)
                 e.draw(batch);
             }
             // Si no hay entidades debajo de los objetos, los dibujamos al final
             if (!arbolDibujado && textureArbol != null) batch.draw(textureArbol, 950, 350, 1300, 1900);
-            if (!arbol2Dibujado && textureArbol2 != null) batch.draw(textureArbol2, 0, 450, 1100, 1600);
-            if (!floresDibujadas) {
-                if (textureFlor != null) batch.draw(textureFlor, 1400, 190, 500, 1000);
-            }
+            if (!arbol2Dibujado && textureArbol2 != null) batch.draw(textureArbol2, -100, 500, 900, 1400);
+            if (!puestoDibujado && texturePuesto != null) batch.draw(texturePuesto, 1100, 1600, 400, 400);
+            if (!floresDibujadas && textureFlor != null) batch.draw(textureFlor, 1400, 190, 500, 1000);
+            //if (!piedraDibujada && texturePiedra != null) batch.draw(texturePiedra, 1500, 150, 300, 300);
+            if (!escalerasDibujadas && textureEscaleras != null) batch.draw(textureEscaleras, 300, -85, 690, 1000);
         } else {
             // En otros niveles dibujamos normal
             for (Entidad e : entidadesRender) e.draw(batch);
@@ -272,25 +304,50 @@ public class Main extends ApplicationAdapter {
         for (Plataformas p : plataformas) p.draw(batch);
 
         batch.end();
+
+        // --- DIBUJO DE COLLIDERS (Debug) ---
+        shapeRenderer.setProjectionMatrix(camara.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(0, 1, 0, 1); // Verde para plataformas
+        for (Plataformas p : plataformas) {
+            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+        }
+        if (prota != null && !prota.shouldRemove()) {
+            shapeRenderer.setColor(1, 0, 0, 1); // Rojo para el personaje
+            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
+        }
+        shapeRenderer.end();
+        // -----------------------------------
+
         controllers.draw();
     }
     private void cargarFondoNivel(int nivel) {
-        if (background != null) background.dispose(); // Liberar memoria del fondo anterior
+        if (background != null) background.dispose();
         if (textureArbol != null) textureArbol.dispose();
         if (textureFlor != null) textureFlor.dispose();
         if (textureArbol2 != null) textureArbol2.dispose();
+        if (textureEscaleras != null) textureEscaleras.dispose();
+        //if (texturePiedra != null) texturePiedra.dispose();
+        if (texturePuesto != null) texturePuesto.dispose();
 
         textureArbol = null;
         textureFlor = null;
         textureArbol2 = null;
+        textureEscaleras = null;
+        //texturePiedra = null;
+        texturePuesto = null;
 
         if (nivel == 1) {
             background = new Texture(Gdx.files.internal("nivel-1.png"));
-            textureArbol = new Texture(Gdx.files.internal("Copilot_20260517_174043.png"));
-            textureFlor = new Texture(Gdx.files.internal("Copilot_20260517_175850.png"));
-            textureArbol2 = new Texture(Gdx.files.internal("Captura de pantalla 2026-05-17 181557.png"));
+            textureArbol = new Texture(Gdx.files.internal("arbol1-nivel-1.png"));
+            textureFlor = new Texture(Gdx.files.internal("flor.png"));
+            textureArbol2 = new Texture(Gdx.files.internal("arbol2-nivel-1.png"));
+            textureEscaleras = new Texture(Gdx.files.internal("escaleras.png"));
+            //texturePiedra = new Texture(Gdx.files.internal("piedra.png"));
+            texturePuesto = new Texture(Gdx.files.internal("puesto.png"));
         } else if (nivel == 2) {
-            background = new Texture(Gdx.files.internal("fondoOpt2.jpeg")); // O el que corresponda
+            // CAMBIO: Aquí también he puesto nivel-1.png para que no falle el nivel 2
+            background = new Texture(Gdx.files.internal("nivel-1.png"));
         }
     }
 
@@ -427,12 +484,13 @@ public class Main extends ApplicationAdapter {
         }
         batch.end();
 
-//            shapeRenderer.setProjectionMatrix(camara.combined);
-//            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-//            shapeRenderer.setColor(0, 1, 0, 1);
-//            for (Plataformas p : plataformas) {
-//                shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
-//            }
+            shapeRenderer.setProjectionMatrix(camara.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            shapeRenderer.setColor(0, 1, 0, 1);
+            for (Plataformas p : plataformas) {
+                shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+            }
+
 //            if (!prota.shouldRemove()) {
 //                shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
 //
@@ -448,7 +506,7 @@ public class Main extends ApplicationAdapter {
 //                    }
 //                }
 //            }
-//            shapeRenderer.end();
+        shapeRenderer.end();
 
         controllers.stage.act(deltaTime);
         controllers.update(deltaTime);
@@ -474,6 +532,9 @@ public class Main extends ApplicationAdapter {
         if (textureArbol != null) textureArbol.dispose();
         if (textureFlor != null) textureFlor.dispose();
         if (textureArbol2 != null) textureArbol2.dispose();
+        if (textureEscaleras != null) textureEscaleras.dispose();
+        //if (texturePiedra != null) texturePiedra.dispose();
+        if (texturePuesto != null) texturePuesto.dispose();
         shapeRenderer.dispose();
         menu.dispose();
         //menuNiveles.dispose();

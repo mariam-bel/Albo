@@ -68,7 +68,7 @@ public class Mob extends Entidad {
         // Configuración de las animaciones estándar de los Mobs
         animations.put("IDLE", crearAnimacion(sheet, filaIdle, framesIdle, cols, filas, 0.1f, Animation.PlayMode.LOOP));
         animations.put("WALK", crearAnimacion(sheet, filaWalk, framesWalk, cols, filas, 0.1f, Animation.PlayMode.LOOP));
-        animations.put("HURT", crearAnimacion(sheet, filaWalk, framesWalk, cols, filas, 0.1f, Animation.PlayMode.LOOP));
+        animations.put("HURT", crearAnimacion(sheet, filaHurt, framesHurt, cols, filas, 0.1f, Animation.PlayMode.LOOP));
         animations.put("ATTACK", crearAnimacion(sheet, filaAttack, framesAttack, cols, filas, 0.1f, Animation.PlayMode.NORMAL));
         animations.put("DEAD", crearAnimacion(sheet, filaDead, framesDead, cols, filas, 0.1f, Animation.PlayMode.NORMAL));
 

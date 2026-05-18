@@ -35,8 +35,16 @@ public abstract class Entidad {
         int fh = sheet.getHeight() / filTotales;
         TextureRegion[][] temp = TextureRegion.split(sheet, fw, fh);
         Array<TextureRegion> frames = new Array<>();
-        for (int i = 0; i < cantidad; i++) {
-            frames.add(temp[fila][i]);
+
+        // Asegurar que no nos salimos de las dimensiones reales del array
+        int filasReales = temp.length;
+        int columnasReales = (filasReales > 0) ? temp[0].length : 0;
+
+        int filaUso = Math.min(fila, filasReales - 1);
+        int cantidadUso = Math.min(cantidad, columnasReales);
+
+        for (int i = 0; i < cantidadUso; i++) {
+            frames.add(temp[filaUso][i]);
         }
         return new Animation<>(frameDuration, frames, mode);
     }
@@ -45,12 +53,14 @@ public abstract class Entidad {
         int fw = sheet.getWidth() / colTotales;
         int fh = sheet.getHeight() / filTotales;
         TextureRegion[][] temp = TextureRegion.split(sheet, fw, fh);
-
         Array<TextureRegion> frames = new Array<>();
 
+        int filasReales = temp.length;
+        int columnasReales = (filasReales > 0) ? temp[0].length : 0;
+
         for (int f = 0; f < filas.length; f++) {
-            int fila = filas[f];
-            int cantidad = cantidadesPorFila[f];
+            int fila = Math.min(filas[f], filasReales - 1);
+            int cantidad = Math.min(cantidadesPorFila[f], columnasReales);
 
             for (int i = 0; i < cantidad; i++) {
                 frames.add(temp[fila][i]);
