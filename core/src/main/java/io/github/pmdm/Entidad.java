@@ -17,7 +17,6 @@ public abstract class Entidad {
     protected Rectangle bounds;
     protected boolean facingRight = true;
     protected ObjectMap<String, Animation<TextureRegion>> animations;
-
     public enum Estado { IDLE, WALK, JUMP, ATTACK, HURT, DEAD }
     protected Estado estadoActual = Estado.IDLE;
     protected Estado estadoAnterior = Estado.IDLE;
@@ -68,6 +67,17 @@ public abstract class Entidad {
         }
 
         return new Animation<>(frameDuration, frames, mode);
+    }
+
+    // MÉTODO QUE DEVUELVE LA ESCALA DE LA ENTIDAD SEGÚN SU POSICIÓN EN Y
+    public float getEscalaProfundidad() {
+        float maxY = 2000;
+        float minScale = 0.5f;
+        float maxScale = 1.2f;
+
+        float escala = + (maxScale- minScale) * (1 - (position.y / maxY));
+
+        return Math.max(minScale, Math.min(maxScale,escala));
     }
 
     protected void updateStateTime(float delta) {
