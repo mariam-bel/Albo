@@ -15,6 +15,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Comparator;
+
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
 
@@ -34,8 +36,14 @@ public class Main extends ApplicationAdapter {
     private World world;
     private Array<Plataformas> plataformas;
     private Array<Mob> mobs;
+    private Array<Prop> propsNivel;
     private boolean golpeRealizado = false;
-
+    private final Comparator<Entidad> ySortComparator = new Comparator<Entidad>() {
+        @Override
+        public int compare(Entidad e1, Entidad e2) {
+            return Float.compare(e2.getPosition().y, e1.getPosition().y);
+        }
+    };
 
     @Override
     public void create() {
@@ -52,6 +60,7 @@ public class Main extends ApplicationAdapter {
         camara.setToOrtho(false, 2500, 2000);
 
         mobs = new Array<>();
+        propsNivel = new Array<>();
         plataformas = new Array<>();
 
         // CORRECCIÓN 2: Crear al prota ANTES de cargar las entidades del nivel
@@ -75,6 +84,7 @@ public class Main extends ApplicationAdapter {
 
     private void cargarEntidadesNivel() {
         mobs.clear();
+        propsNivel.clear();
         plataformas.clear();
 
         switch (nivelActivo){
@@ -225,27 +235,29 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(camara.combined);
         batch.begin();
 
-        // 1. DIBUJAMOS EL FONDO (Siempre detrás de todo)
         batch.draw(background, 0, 0, 2500, 2000);
 
-        // 2. PREPARAMOS EL Y-SORT
-        entidadesRender.clear();
+        // ORDENAMOS LAS ENTIDADES
         if (!prota.shouldRemove()) entidadesRender.add(prota);
         for (Mob m : mobs) if (!m.shouldRemove()) entidadesRender.add(m);
+        entidadesRender.addAll(propsNivel);
 
-        // Ordenamos: Mayor Y primero (se dibuja antes = queda detrás)
-        // Menor Y al final (se dibuja después = queda delante)
+        // MAYOR Y = MÁS AL FONDO
         entidadesRender.sort((e1, e2) -> Float.compare(e2.getPosition().y, e1.getPosition().y));
 
-        // 3. RENDERIZADO CON PROFUNDIDAD DINÁMICA
-        // Definimos a qué altura (Y) están las bases del árbol y las flores
-        // He puesto 1650 porque es donde empieza tu prota, ajústalo según el suelo del árbol
+        // DEFINIMOS ALTURAS DE LAS BASES
         float yBaseArbol = 1660f;
         float yBaseArbol2 = 1660f;
         float yBaseFlores = 1640f;
         float yBasePuesto = 1650f;
         float yBasePiedra = 200f;
         float yBaseEscaleras = 200f;
+
+        propsNivel.add(new Prop(textureArbol, 950, 350, 1300, 1900));
+        propsNivel.add(new Prop(textureArbol2, -15, 700, 700, 1400));
+        propsNivel.add(new Prop(textureFlor, 1400, 190, 500, 1000));
+        propsNivel.add(new Prop(texturePuesto, 960, 450, 250, 390));
+        propsNivel.add(new Prop(textureEscaleras, 300, -85, 690, 1000));
 
         boolean arbolDibujado = false;
         boolean arbol2Dibujado = false;
@@ -256,40 +268,32 @@ public class Main extends ApplicationAdapter {
 
         if (nivelActivo == 1) {
             for (Entidad e : entidadesRender) {
-                // Dibujamos el árbol cuando lleguemos a su altura
                 if (!arbolDibujado && e.getPosition().y < yBaseArbol) {
                     if (textureArbol != null) batch.draw(textureArbol, 950, 350, 1300, 1900);
                     arbolDibujado = true;
                 }
-                // Dibujamos el segundo árbol (izquierda)
                 if (!arbol2Dibujado && e.getPosition().y < yBaseArbol2) {
                     if (textureArbol2 != null) batch.draw(textureArbol2, -15, 700, 700, 1400);
                     arbol2Dibujado = true;
                 }
-                // Dibujamos el puesto
                 if (!puestoDibujado && e.getPosition().y < yBasePuesto) {
                     if (texturePuesto != null) batch.draw(texturePuesto, 960, 450, 250, 390);
                     puestoDibujado = true;
                 }
-                // Dibujamos las flores cuando lleguemos a su altura
                 if (!floresDibujadas && e.getPosition().y < yBaseFlores) {
                     if (textureFlor != null) batch.draw(textureFlor, 1400, 190, 500, 1000);
                     floresDibujadas = true;
                 }
-                // Dibujamos la piedra
 //                if (!piedraDibujada && e.getPosition().y < yBasePiedra) {
 //                    if (texturePiedra != null) batch.draw(texturePiedra, -100, 150, 100, 300);
 //                    piedraDibujada = true;
 //                }
-                // Dibujamos las escaleras
                 if (!escalerasDibujadas && e.getPosition().y < yBaseEscaleras) {
                     if (textureEscaleras != null) batch.draw(textureEscaleras, 300, -85, 690, 1000);
                     escalerasDibujadas = true;
                 }
-                // Dibujamos la entidad (prota o mob)
                 e.draw(batch);
             }
-            // Si no hay entidades debajo de los objetos, los dibujamos al final
             if (!arbolDibujado && textureArbol != null) batch.draw(textureArbol, 950, 350, 1300, 1900);
             if (!arbol2Dibujado && textureArbol2 != null) batch.draw(textureArbol2, -100, 500, 900, 1400);
             if (!puestoDibujado && texturePuesto != null) batch.draw(texturePuesto, 1100, 1600, 400, 400);
@@ -297,7 +301,6 @@ public class Main extends ApplicationAdapter {
             //if (!piedraDibujada && texturePiedra != null) batch.draw(texturePiedra, 1500, 150, 300, 300);
             if (!escalerasDibujadas && textureEscaleras != null) batch.draw(textureEscaleras, 300, -85, 690, 1000);
         } else {
-            // En otros niveles dibujamos normal
             for (Entidad e : entidadesRender) e.draw(batch);
         }
 
@@ -305,7 +308,7 @@ public class Main extends ApplicationAdapter {
 
         batch.end();
 
-        // --- DIBUJO DE COLLIDERS (Debug) ---
+        // DIBUJAR COLIDERS
         shapeRenderer.setProjectionMatrix(camara.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(0, 1, 0, 1); // Verde para plataformas

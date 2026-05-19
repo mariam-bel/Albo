@@ -94,7 +94,7 @@ public abstract class Entidad {
 
         sprite.setRegion(currentFrame);
         sprite.setFlip(!facingRight, false);
-        sprite.setPosition(position.x, position.y);
+        sprite.setPosition(position.x, position.y - sprite.getHeight()/2);
         sprite.draw(batch);
     }
 
