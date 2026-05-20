@@ -113,6 +113,14 @@ public class Main extends ApplicationAdapter {
                 plataformas.add(new Plataformas(1820, 500, 1500, 100, false));
                 plataformas.add(new Plataformas(1875, 600, 100, 38, true));
                 plataformas.add(new Plataformas(0, 0, 2500, 1, false));
+
+
+                propsNivel.add(new Prop(textureArbol, 950, 350, 1300, 1900));
+                propsNivel.add(new Prop(textureArbol2, -15, 700, 700, 1400));
+                propsNivel.add(new Prop(textureFlor, 1400, 190, 500, 1000));
+                propsNivel.add(new Prop(texturePuesto, 960, 450, 250, 390));
+                propsNivel.add(new Prop(textureEscaleras, 300, -85, 690, 1000));
+
                 break;
             case 2:
                 //Aquí añadimos los bloques y mobs que irán en el nivel 2
@@ -132,8 +140,8 @@ public class Main extends ApplicationAdapter {
 
         boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.D)|| Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.A)|| Gdx.input.isKeyPressed(Input.Keys.LEFT);
-        boolean arriba = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W);
-        boolean abajo = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S);
+        boolean arriba = controllers.isArriba() || Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W);
+        boolean abajo = controllers.isAbajo() || Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S);
         boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
         boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.INSERT);
 
@@ -143,7 +151,6 @@ public class Main extends ApplicationAdapter {
             velocidad.x = -500;
         } else {
             velocidad.x = 0;
-            velocidad.y = 0;
         }
 
         if (arriba){
@@ -237,6 +244,8 @@ public class Main extends ApplicationAdapter {
 
         batch.draw(background, 0, 0, 2500, 2000);
 
+        entidadesRender.clear();
+
         // ORDENAMOS LAS ENTIDADES
         if (!prota.shouldRemove()) entidadesRender.add(prota);
         for (Mob m : mobs) if (!m.shouldRemove()) entidadesRender.add(m);
@@ -245,19 +254,6 @@ public class Main extends ApplicationAdapter {
         // MAYOR Y = MÁS AL FONDO
         entidadesRender.sort((e1, e2) -> Float.compare(e2.getPosition().y, e1.getPosition().y));
 
-        // DEFINIMOS ALTURAS DE LAS BASES
-        float yBaseArbol = 1660f;
-        float yBaseArbol2 = 1660f;
-        float yBaseFlores = 1640f;
-        float yBasePuesto = 1650f;
-        float yBasePiedra = 200f;
-        float yBaseEscaleras = 200f;
-
-        propsNivel.add(new Prop(textureArbol, 950, 350, 1300, 1900));
-        propsNivel.add(new Prop(textureArbol2, -15, 700, 700, 1400));
-        propsNivel.add(new Prop(textureFlor, 1400, 190, 500, 1000));
-        propsNivel.add(new Prop(texturePuesto, 960, 450, 250, 390));
-        propsNivel.add(new Prop(textureEscaleras, 300, -85, 690, 1000));
 
         boolean arbolDibujado = false;
         boolean arbol2Dibujado = false;
@@ -268,40 +264,8 @@ public class Main extends ApplicationAdapter {
 
         if (nivelActivo == 1) {
             for (Entidad e : entidadesRender) {
-                if (!arbolDibujado && e.getPosition().y < yBaseArbol) {
-                    if (textureArbol != null) batch.draw(textureArbol, 950, 350, 1300, 1900);
-                    arbolDibujado = true;
-                }
-                if (!arbol2Dibujado && e.getPosition().y < yBaseArbol2) {
-                    if (textureArbol2 != null) batch.draw(textureArbol2, -15, 700, 700, 1400);
-                    arbol2Dibujado = true;
-                }
-                if (!puestoDibujado && e.getPosition().y < yBasePuesto) {
-                    if (texturePuesto != null) batch.draw(texturePuesto, 960, 450, 250, 390);
-                    puestoDibujado = true;
-                }
-                if (!floresDibujadas && e.getPosition().y < yBaseFlores) {
-                    if (textureFlor != null) batch.draw(textureFlor, 1400, 190, 500, 1000);
-                    floresDibujadas = true;
-                }
-//                if (!piedraDibujada && e.getPosition().y < yBasePiedra) {
-//                    if (texturePiedra != null) batch.draw(texturePiedra, -100, 150, 100, 300);
-//                    piedraDibujada = true;
-//                }
-                if (!escalerasDibujadas && e.getPosition().y < yBaseEscaleras) {
-                    if (textureEscaleras != null) batch.draw(textureEscaleras, 300, -85, 690, 1000);
-                    escalerasDibujadas = true;
-                }
                 e.draw(batch);
             }
-            if (!arbolDibujado && textureArbol != null) batch.draw(textureArbol, 950, 350, 1300, 1900);
-            if (!arbol2Dibujado && textureArbol2 != null) batch.draw(textureArbol2, -100, 500, 900, 1400);
-            if (!puestoDibujado && texturePuesto != null) batch.draw(texturePuesto, 1100, 1600, 400, 400);
-            if (!floresDibujadas && textureFlor != null) batch.draw(textureFlor, 1400, 190, 500, 1000);
-            //if (!piedraDibujada && texturePiedra != null) batch.draw(texturePiedra, 1500, 150, 300, 300);
-            if (!escalerasDibujadas && textureEscaleras != null) batch.draw(textureEscaleras, 300, -85, 690, 1000);
-        } else {
-            for (Entidad e : entidadesRender) e.draw(batch);
         }
 
         for (Plataformas p : plataformas) p.draw(batch);

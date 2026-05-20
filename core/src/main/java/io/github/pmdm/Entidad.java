@@ -75,7 +75,7 @@ public abstract class Entidad {
         float minScale = 0.5f;
         float maxScale = 1.2f;
 
-        float escala = + (maxScale- minScale) * (1 - (position.y / maxY));
+        float escala = minScale + (maxScale - minScale) * (1 - (position.y / maxY));
 
         return Math.max(minScale, Math.min(maxScale,escala));
     }
@@ -95,6 +95,13 @@ public abstract class Entidad {
         sprite.setRegion(currentFrame);
         sprite.setFlip(!facingRight, false);
         sprite.setPosition(position.x, position.y - sprite.getHeight()/2);
+
+        float escala = getEscalaProfundidad();
+        float anchoFinal = sprite.getWidth();
+        float altoFinal = sprite.getHeight();
+
+        batch.draw(currentFrame, position.x - anchoFinal/2, position.y, anchoFinal, altoFinal);
+
         sprite.draw(batch);
     }
 
