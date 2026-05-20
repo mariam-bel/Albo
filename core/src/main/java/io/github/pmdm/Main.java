@@ -47,11 +47,13 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
+
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         world = new World(new Vector2(0,-10), true);
 
         menu = new Menu();
+        //menuNiveles = new Levels();
 
         // CORRECCIÓN 1: Usar nivel-1.png que sí existe
         background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
@@ -62,6 +64,7 @@ public class Main extends ApplicationAdapter {
         mobs = new Array<>();
         propsNivel = new Array<>();
         plataformas = new Array<>();
+        cargarEntidadesNivel();
 
         // CORRECCIÓN 2: Crear al prota ANTES de cargar las entidades del nivel
         controllers = new Controllers();
@@ -71,6 +74,7 @@ public class Main extends ApplicationAdapter {
         cargarEntidadesNivel();
 
         Gdx.input.setInputProcessor(menu.stage);
+
     }
 
     private void volverAlMenu() {
@@ -102,17 +106,17 @@ public class Main extends ApplicationAdapter {
                 */
 
 
-                plataformas.add(new Plataformas(2340, 1, 70, 100 , false));
-                plataformas.add(new Plataformas(2200, 1, 175, 60 , false));
-                plataformas.add(new Plataformas(1500, 300, 30, 100, true));
-                plataformas.add(new Plataformas(1535, 545, 50, 60, true));
-                plataformas.add(new Plataformas(1510, 790, 50, 90, true));
-                plataformas.add(new Plataformas(0, 0, 300, 740, false));
-                plataformas.add(new Plataformas(300, 200, 280, 300, false));
-                plataformas.add(new Plataformas(600, 200, 1400, 90, false));
-                plataformas.add(new Plataformas(1820, 500, 1500, 100, false));
-                plataformas.add(new Plataformas(1875, 600, 100, 38, true));
-                plataformas.add(new Plataformas(0, 0, 2500, 1, false));
+                plataformas.add(new Plataformas(2340, 1, 70, 100 , false, false));
+                plataformas.add(new Plataformas(2200, 1, 175, 60 , false, true));
+                plataformas.add(new Plataformas(1500, 300, 30, 100, true, true));
+                plataformas.add(new Plataformas(1535, 545, 50, 60, true, true));
+                plataformas.add(new Plataformas(1510, 790, 50, 90, true, false));
+                plataformas.add(new Plataformas(0, 0, 300, 740, false, true));
+                plataformas.add(new Plataformas(300, 200, 280, 300, false, true));
+                plataformas.add(new Plataformas(600, 200, 1400, 90, false, true));
+                plataformas.add(new Plataformas(1820, 500, 1500, 100, false, true));
+                plataformas.add(new Plataformas(1875, 600, 100, 38, true, true));
+                plataformas.add(new Plataformas(0, 0, 2500, 1, false, true));
 
 
                 propsNivel.add(new Prop(textureArbol, 950, 350, 1300, 1900));
@@ -141,30 +145,31 @@ public class Main extends ApplicationAdapter {
 
         boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.D)|| Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.A)|| Gdx.input.isKeyPressed(Input.Keys.LEFT);
-        boolean arriba = controllers.isArriba() || Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W);
-        boolean abajo = controllers.isAbajo() || Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S);
         boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
-        boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.INSERT);
+        boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.W);
+
+        boolean arriba = Gdx.input.isKeyPressed(Input.Keys.UP);
+        boolean abajo = Gdx.input.isKeyPressed(Input.Keys.DOWN);
 
         if (avanzar) {
-            velocidad.x = 500 * prota.getEscalaProfundidad();
+            velocidad.x = 500;
         } else if (retroceder) {
-            velocidad.x = -500 * prota.getEscalaProfundidad();
+            velocidad.x = -500;
         } else {
             velocidad.x = 0;
         }
 
-        velocidad.y = 0;
-
-        if (arriba){
-            velocidad.y = 500 * prota.getEscalaProfundidad();
-        }
-        if (abajo) {
-            velocidad.y = -500 * prota.getEscalaProfundidad();
-        }
-
         if (saltar) {
             prota.jump();
+        }
+        if (prota.enZonaLibre&&!prota.isJumping) {
+            if (arriba) {
+                velocidad.y = 500;
+            } else if (abajo) {
+                velocidad.y = -500;
+            } else {
+                velocidad.y = 0;
+            }
         }
         if (atacar) {
             prota.attack();
@@ -241,10 +246,12 @@ public class Main extends ApplicationAdapter {
         }
 
     }
+
     private void dibujarJuego() {
         batch.setProjectionMatrix(camara.combined);
         batch.begin();
 
+        // Fondo --> Cambiar el texture según nivelActivo
         batch.draw(background, 0, 0, 2500, 2000);
 
         entidadesRender.clear();
@@ -272,24 +279,43 @@ public class Main extends ApplicationAdapter {
         }
 
         for (Plataformas p : plataformas) p.draw(batch);
+        for (Mob m: mobs) if (!m.shouldRemove()) m.draw(batch);
+        if (!prota.shouldRemove()) prota.draw(batch);
 
         batch.end();
 
-        // DIBUJAR COLIDERS
         shapeRenderer.setProjectionMatrix(camara.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(0, 1, 0, 1); // Verde para plataformas
+
+        // 1. Dibujar hitboxes de las plataformas (Verde)
+        shapeRenderer.setColor(0, 1, 0, 1);
         for (Plataformas p : plataformas) {
             shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
         }
-        if (prota != null && !prota.shouldRemove()) {
-            shapeRenderer.setColor(1, 0, 0, 1); // Rojo para el personaje
+
+        // 2. Dibujar hitboxes del protagonista y su ataque
+        if (!prota.shouldRemove()) {
+            shapeRenderer.setColor(0, 1, 0, 1); // Cuerpo en verde
             shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
+
+            shapeRenderer.setColor(1, 0, 0, 1); // Rango de ataque en rojo
+            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+        }
+
+        // 3. Dibujar hitboxes de los mobs (Azul)
+        shapeRenderer.setColor(0, 0, 1, 1);
+        for (Mob m : mobs){
+            if (!m.shouldRemove()) {
+                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+                if(m.isAttacking()) {
+                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
+                }
+            }
         }
         shapeRenderer.end();
-        // -----------------------------------
 
         controllers.draw();
+
     }
     private void cargarFondoNivel(int nivel) {
         if (background != null) background.dispose();
@@ -463,23 +489,22 @@ public class Main extends ApplicationAdapter {
             for (Plataformas p : plataformas) {
                 shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
             }
+            if (!prota.shouldRemove()) {
+                shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
 
-//            if (!prota.shouldRemove()) {
-//                shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
-//
-//                shapeRenderer.setColor(1, 0, 0, 1);
-//                shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
-//            }
-//            shapeRenderer.setColor(0, 0, 1, 1);
-//            for (Mob m: mobs){
-//                if (!m.shouldRemove()) {
-//                    shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
-//                    if(m.isAttacking()) {
-//                        shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
-//                    }
-//                }
-//            }
-        shapeRenderer.end();
+                shapeRenderer.setColor(1, 0, 0, 1);
+                shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+            }
+            shapeRenderer.setColor(0, 0, 1, 1);
+            for (Mob m: mobs){
+                if (!m.shouldRemove()) {
+                    shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+                    if(m.isAttacking()) {
+                        shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
+                    }
+                }
+            }
+            shapeRenderer.end();
 
         controllers.stage.act(deltaTime);
         controllers.update(deltaTime);
