@@ -13,10 +13,20 @@ import com.badlogic.gdx.utils.Array;
 public abstract class Entidad {
     protected Sprite sprite;
     protected Vector2 position, velocidad;
+    private float alturaZ = 0;
     protected float stateTime;
     protected Rectangle bounds;
     protected boolean facingRight = true;
     protected ObjectMap<String, Animation<TextureRegion>> animations;
+
+    public float getAlturaZ() {
+        return alturaZ;
+    }
+
+    public void setAlturaZ(float alturaZ) {
+        this.alturaZ = alturaZ;
+    }
+
     public enum Estado { IDLE, WALK, JUMP, ATTACK, HURT, DEAD }
     protected Estado estadoActual = Estado.IDLE;
     protected Estado estadoAnterior = Estado.IDLE;
@@ -97,12 +107,11 @@ public abstract class Entidad {
         sprite.setPosition(position.x, position.y - sprite.getHeight()/2);
 
         float escala = getEscalaProfundidad();
-        float anchoFinal = sprite.getWidth();
-        float altoFinal = sprite.getHeight();
+        float anchoFinal = currentFrame.getRegionWidth()*escala;
+        float altoFinal = currentFrame.getRegionHeight()*escala;
 
-        batch.draw(currentFrame, position.x - anchoFinal/2, position.y, anchoFinal, altoFinal);
+        batch.draw(currentFrame, position.x - anchoFinal/2f, position.y + alturaZ, anchoFinal, altoFinal);
 
-        sprite.draw(batch);
     }
 
     public abstract void update(float delta);

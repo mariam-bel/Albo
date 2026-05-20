@@ -65,7 +65,7 @@ public class Main extends ApplicationAdapter {
 
         // CORRECCIÓN 2: Crear al prota ANTES de cargar las entidades del nivel
         controllers = new Controllers();
-        prota = new Personaje(100, 1650);
+        prota = new Personaje(100, 1650, 1f);
 
         nivelActivo = 1;
         cargarEntidadesNivel();
@@ -75,7 +75,7 @@ public class Main extends ApplicationAdapter {
 
     private void volverAlMenu() {
         estadoActual = Estado.INICIO;
-        prota = new Personaje(100, 1650);
+        prota = new Personaje(100, 1650, 1f);
         cargarEntidadesNivel();
 
         //menuNiveles.reset();
@@ -146,18 +146,20 @@ public class Main extends ApplicationAdapter {
         boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.INSERT);
 
         if (avanzar) {
-            velocidad.x = 500;
+            velocidad.x = 500 * prota.getEscalaProfundidad();
         } else if (retroceder) {
-            velocidad.x = -500;
+            velocidad.x = -500 * prota.getEscalaProfundidad();
         } else {
             velocidad.x = 0;
         }
 
+        velocidad.y = 0;
+
         if (arriba){
-            velocidad.y = 500;
+            velocidad.y = 500 * prota.getEscalaProfundidad();
         }
         if (abajo) {
-            velocidad.y = -500;
+            velocidad.y = -500 * prota.getEscalaProfundidad();
         }
 
         if (saltar) {

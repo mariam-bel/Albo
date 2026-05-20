@@ -16,14 +16,14 @@ public class Personaje extends Entidad {
     private Texture protaImg;
     private Sprite protaSprite;
     public Vector2 position, velocidad;
+    float alturaZ;
+    float velocidadZ;
     private float stateTime, gravedad;
     private final float FRAME_DURATION = 0.1f;
     boolean suelo, isJumping;
-
     enum Estado {IDLE, WALK, JUMP, ATTACK, HURT, DEAD}
     private Estado estadoActual;
     private Estado estadoAnterior;
-
     private boolean isAttacking = false;
     private boolean isDead = false;
     private boolean isHurt = false;
@@ -31,10 +31,8 @@ public class Personaje extends Entidad {
     Rectangle bounds;
     private Rectangle hurtBox, attackBox;
     boolean facingRight = true;
-
     int saltos = 0;
     int numSaltos = 2;
-
     private float hurtTimer = 0;
     private final float HURT_DURATION = FRAME_DURATION * 8;
     private int vidas = 3;
@@ -42,11 +40,13 @@ public class Personaje extends Entidad {
     private boolean isInvulnerable = false;
     private float invulnerableTimer = 0f;
     private final float INVULNERABLE_DURATION = 1.5f;
-    public Personaje(float inicioX, float inicioY) {
+    public Personaje(float inicioX, float inicioY, float gravedad) {
         super( 10, 0.2f);
 
         position = new Vector2(inicioX, inicioY);
         velocidad = new Vector2();
+
+        alturaZ = gravedad;
 
         hurtBox = new Rectangle(inicioX, inicioY, 120, 140);
         attackBox = new Rectangle();
@@ -99,7 +99,7 @@ public class Personaje extends Entidad {
 
     public void jump() {
         if (saltos < numSaltos) {
-            velocidad.y = 500f;
+            velocidadZ = 500f;
             isJumping = true;
             stateTime = 0;
             suelo = false;
@@ -136,7 +136,8 @@ public class Personaje extends Entidad {
     public void update(float delta, Array<Rectangle> superficies, Array<Plataformas> plataformasOriginales) {
         stateTime += delta;
         if (!isDead) {
-            velocidad.y -= gravedad * delta;
+            alturaZ -= gravedad * delta;
+            position.y += velocidad.y * delta;
             position.x += velocidad.x * delta;
             bounds.setPosition(position.x, position.y);
 
@@ -167,14 +168,17 @@ public class Personaje extends Entidad {
                 if (bounds.overlaps(rect)) {
                     if (p.isAtravesable()) {
 
-                        if (velocidad.y <= 0) {
+                        velocidadZ -= gravedad * delta;
+                        alturaZ += velocidadZ * delta;
+
+                        if (alturaZ <= 0) {
 
                             float personajeBottom = bounds.y;
                             float plataformaTop = rect.y + rect.height;
 
                             if (personajeBottom >= plataformaTop - 10) {
-                                position.y = plataformaTop;
-                                velocidad.y = 0;
+                                alturaZ = plataformaTop;
+                                velocidadZ = 0;
                                 suelo = true;
                                 saltos = 0;
                             }
@@ -182,9 +186,9 @@ public class Personaje extends Entidad {
 
                     } else {
                         if (velocidad.y > 0) {
-                            position.y = rect.y - bounds.height;
+                            alturaZ = rect.y - bounds.height;
                         } else if (velocidad.y < 0) {
-                            position.y = rect.y + rect.height;
+                            alturaZ = rect.y + rect.height;
                             suelo = true;
                             saltos = 0;
                         }
@@ -198,11 +202,13 @@ public class Personaje extends Entidad {
 
             position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth()+50);
             position.y = MathUtils.clamp(position.y, 0, Gdx.graphics.getHeight() - protaSprite.getHeight()+20);
-            if (position.y <= 0) {
-                position.y = 0;
-                velocidad.y = 0;
+            velocidadZ -= gravedad * delta;
+            alturaZ += velocidadZ * delta;
+
+            if (alturaZ <= 0) {
+                alturaZ = 0;
+                velocidadZ = 0;
                 suelo = true;
-                saltos = 0;
             }
 
             if (velocidad.x > 0) facingRight = true;
@@ -280,8 +286,11 @@ public class Personaje extends Entidad {
             }
         }
 
-        protaSprite.draw(batch);
-    }
+        batch.draw(
+            sprite,
+            position.x,
+            position.y + alturaZ
+        );    }
 
     @Override
     public void update(float delta) {
