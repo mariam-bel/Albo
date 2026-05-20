@@ -28,7 +28,7 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     public static SpriteBatch batch;
     private Texture background;
-    private Texture textureArbol, textureFlor, textureArbol2, textureEscaleras, texturePiedra, texturePuesto;
+    private Texture textureArbol, textureFlor, textureArbol2, textureEscaleras, texturePiedra, texturePuesto, textureGato;
     private Array<Entidad> entidadesRender = new Array<>();
     private Personaje prota;
     private Controllers controllers;
@@ -54,7 +54,7 @@ public class Main extends ApplicationAdapter {
         menu = new Menu();
 
         // CORRECCIÓN 1: Usar nivel-1.png que sí existe
-        background = new Texture(Gdx.files.internal("nivel-1.png"));
+        background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
 
         camara = new OrthographicCamera();
         camara.setToOrtho(false, 2500, 2000);
@@ -120,6 +120,7 @@ public class Main extends ApplicationAdapter {
                 propsNivel.add(new Prop(textureFlor, 1400, 190, 500, 1000));
                 propsNivel.add(new Prop(texturePuesto, 960, 450, 250, 390));
                 propsNivel.add(new Prop(textureEscaleras, 300, -85, 690, 1000));
+                propsNivel.add(new Prop(textureGato, 1200, 1650, 100, 100));
 
                 break;
             case 2:
@@ -298,6 +299,7 @@ public class Main extends ApplicationAdapter {
         if (textureEscaleras != null) textureEscaleras.dispose();
         //if (texturePiedra != null) texturePiedra.dispose();
         if (texturePuesto != null) texturePuesto.dispose();
+        if (textureGato != null) textureGato.dispose();
 
         textureArbol = null;
         textureFlor = null;
@@ -305,18 +307,20 @@ public class Main extends ApplicationAdapter {
         textureEscaleras = null;
         //texturePiedra = null;
         texturePuesto = null;
+        textureGato = null;
 
         if (nivel == 1) {
-            background = new Texture(Gdx.files.internal("nivel-1.png"));
-            textureArbol = new Texture(Gdx.files.internal("arbol1-nivel-1.png"));
-            textureFlor = new Texture(Gdx.files.internal("flor.png"));
-            textureArbol2 = new Texture(Gdx.files.internal("arbol2-nivel-1.png"));
-            textureEscaleras = new Texture(Gdx.files.internal("escaleras.png"));
-            //texturePiedra = new Texture(Gdx.files.internal("piedra.png"));
-            texturePuesto = new Texture(Gdx.files.internal("puesto.png"));
+            background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
+            textureArbol = new Texture(Gdx.files.internal("nivel_1/arbol1-nivel-1.png"));
+            textureFlor = new Texture(Gdx.files.internal("nivel_1/flor.png"));
+            textureArbol2 = new Texture(Gdx.files.internal("nivel_1/arbol2-nivel-1.png"));
+            textureEscaleras = new Texture(Gdx.files.internal("nivel_1/escaleras.png"));
+            //texturePiedra = new Texture(Gdx.files.internal("nivel_1/piedra.png"));
+            texturePuesto = new Texture(Gdx.files.internal("nivel_1/puesto.png"));
+            textureGato = new Texture(Gdx.files.internal("nivel_1/el-gato.png"));
         } else if (nivel == 2) {
             // CAMBIO: Aquí también he puesto nivel-1.png para que no falle el nivel 2
-            background = new Texture(Gdx.files.internal("nivel-1.png"));
+            background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
         }
     }
 
@@ -504,6 +508,7 @@ public class Main extends ApplicationAdapter {
         if (textureEscaleras != null) textureEscaleras.dispose();
         //if (texturePiedra != null) texturePiedra.dispose();
         if (texturePuesto != null) texturePuesto.dispose();
+        if (textureGato != null) textureGato.dispose();
         shapeRenderer.dispose();
         menu.dispose();
         //menuNiveles.dispose();
