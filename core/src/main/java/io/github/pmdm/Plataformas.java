@@ -10,6 +10,7 @@ public class Plataformas {
     private Rectangle bounds;
     private Texture texture;
     private boolean atravesable;
+    private boolean libre;
 
     public Plataformas(float x, float y, float width, float height, String imagen) {
         texture = new Texture(imagen);
@@ -19,11 +20,15 @@ public class Plataformas {
     public boolean isAtravesable() {
         return atravesable;
     }
+    public boolean isLibre() {
+        return libre;
+    }
 
-    public Plataformas(float x, float y, float width, float height, boolean atravesar) {
+    public Plataformas(float x, float y, float width, float height, boolean atravesar, boolean libre) {
         texture=null;
         bounds = new Rectangle(x, y, width, height);
-        atravesable=atravesar;
+        this.atravesable=atravesar;
+        this.libre=libre;
     }
 
     public void draw(SpriteBatch batch) {
