@@ -216,7 +216,7 @@ public class Personaje extends Entidad {
                 suelo = true;
                 saltos = 0;
             }
-            position.y = MathUtils.clamp(position.y, 0, Gdx.graphics.getHeight() - protaSprite.getHeight() + 20);
+            position.y = MathUtils.clamp(position.y, 0, Gdx.graphics.getHeight() - protaSprite.getHeight() + 800);
             bounds.setPosition(position.x, position.y);
 
             if (velocidad.x > 0) facingRight = true;
@@ -244,7 +244,8 @@ public class Personaje extends Entidad {
             estadoAnterior = estadoActual;
             if (isHurt) estadoActual = Estado.HURT;
             else if (isAttacking) estadoActual = Estado.ATTACK;
-            else if (!suelo && (!enZonaLibre || velocidad.y > 0)) estadoActual = Estado.JUMP;            else if (Math.abs(velocidad.x) > 5f) estadoActual = Estado.WALK;
+            else if (!suelo && (!enZonaLibre || velocidad.y > 0)) estadoActual = Estado.JUMP;
+            else if (Math.abs(velocidad.x) > 5f) estadoActual = Estado.WALK;
             else estadoActual = Estado.IDLE;
 
             if (estadoActual != estadoAnterior) stateTime = 0;
