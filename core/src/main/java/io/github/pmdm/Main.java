@@ -79,7 +79,7 @@ public class Main extends ApplicationAdapter {
         switch (nivelActivo){
             case 1:
                 prota.setPosition(400,1000);
-                gatoHitbox = new Rectangle(450, 1000, 100, 100);
+                gatoHitbox = new Rectangle(450, 1500, 100, 100);
 
 //                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
 //                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
@@ -125,9 +125,12 @@ public class Main extends ApplicationAdapter {
                 plataformas.add(new Plataformas(970, 705, 50, 75, false, true));
                 plataformas.add(new Plataformas(1000, 780, 50, 175, false, true));
                 plataformas.add(new Plataformas(790, 950, 178, 30, false, true));
-                plataformas.add(new Plataformas(1125, 860, 250, 25, false, true));
+                plataformas.add(new Plataformas(1125, 860, 270, 25, false, true));
+                plataformas.add(new Plataformas(1430, 860, 250, 350, false, false));
                 plataformas.add(new Plataformas(1050, 725, 125, 75, false, true));
                 plataformas.add(new Plataformas(1270, 675, 125, 75, false, true));
+                plataformas.add(new Plataformas(1150, 0, 125, 200, false, false));
+                plataformas.add(new Plataformas(1250, 200, 125, 200, false, false));
 
 
 
@@ -269,7 +272,6 @@ public class Main extends ApplicationAdapter {
         batch.setProjectionMatrix(camara.combined);
         batch.begin();
 
-        // Fondo --> Cambiar el texture según nivelActivo
         batch.draw(background, 0, 0, 2500, 2000);
 
         for (Plataformas p : plataformas) p.draw(batch);
