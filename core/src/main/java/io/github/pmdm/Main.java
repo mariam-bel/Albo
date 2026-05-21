@@ -25,7 +25,9 @@ public class Main extends ApplicationAdapter {
     private Menu menu;
     private ShapeRenderer shapeRenderer;
     public static SpriteBatch batch;
-    private Texture background;
+    private Rectangle gatoHitbox;
+    private Texture background, textureGato;
+
     private Personaje prota;
     private Controllers controllers;
     private OrthographicCamera camara;
@@ -46,7 +48,7 @@ public class Main extends ApplicationAdapter {
         //menuNiveles = new Levels();
 
         background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
-
+        textureGato = new Texture(Gdx.files.internal("nivel_1/el-gato.png"));
         camara = new OrthographicCamera();
         camara.setToOrtho(false, 1000, 480);
 
@@ -77,6 +79,7 @@ public class Main extends ApplicationAdapter {
         switch (nivelActivo){
             case 1:
                 prota.setPosition(400,1000);
+                gatoHitbox = new Rectangle(450, 1000, 100, 100);
 
 //                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
 //                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
@@ -246,7 +249,9 @@ public class Main extends ApplicationAdapter {
         for (Plataformas p : plataformas) p.draw(batch);
         for (Mob m: mobs) if (!m.shouldRemove()) m.draw(batch);
         if (!prota.shouldRemove()) prota.draw(batch);
-
+        if (nivelActivo == 1 && textureGato != null) {
+            batch.draw(textureGato, gatoHitbox.x, gatoHitbox.y, gatoHitbox.width, gatoHitbox.height);
+        }
         batch.end();
 
         shapeRenderer.setProjectionMatrix(camara.combined);
@@ -304,6 +309,12 @@ public class Main extends ApplicationAdapter {
         if (prota.shouldRemove()) {
             volverAlMenu();
             return;
+        }
+
+        if (gatoHitbox != null && prota.getBounds().overlaps(gatoHitbox)) {
+            nivelActivo = 2;
+            cargarFondoNivel(nivelActivo);
+            cargarEntidadesNivel();
         }
 
         for (Mob m: mobs){
@@ -451,12 +462,42 @@ public class Main extends ApplicationAdapter {
     }
 
     private void actualizarCamara() {
+
+        float smooth = 4f;
+
+        camara.position.x +=
+            (prota.getPosition().x - camara.position.x)
+                * smooth
+                * Gdx.graphics.getDeltaTime();
+
+        camara.position.y +=
+            (prota.getPosition().y - camara.position.y)
+                * smooth
+                * Gdx.graphics.getDeltaTime();
+
+        camara.position.x = MathUtils.clamp(
+            camara.position.x,
+            camara.viewportWidth / 2f,
+            2500 - camara.viewportWidth / 2f
+        );
+
+        camara.position.y = MathUtils.clamp(
+            camara.position.y,
+            camara.viewportHeight / 2f,
+            2000 - camara.viewportHeight / 2f
+        );
+
+        camara.update();
+
+        /*
         camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
         camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
 
         camara.position.x = MathUtils.clamp(camara.position.x, camara.viewportWidth/2, 2500 - camara.viewportWidth/2);
         camara.position.y = MathUtils.clamp(camara.position.y, camara.viewportHeight/2, 2000 - camara.viewportHeight/2);
         camara.update();
+        */
+
     }
 
     @Override
