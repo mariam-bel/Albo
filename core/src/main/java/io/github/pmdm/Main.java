@@ -47,7 +47,6 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
-
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         world = new World(new Vector2(0,-10), true);
@@ -68,9 +67,10 @@ public class Main extends ApplicationAdapter {
 
         // CORRECCIÓN 2: Crear al prota ANTES de cargar las entidades del nivel
         controllers = new Controllers();
-        prota = new Personaje(100, 1650, 1f);
+        prota = new Personaje(100, 1650);
 
         nivelActivo = 1;
+        cargarFondoNivel(nivelActivo);
         cargarEntidadesNivel();
 
         Gdx.input.setInputProcessor(menu.stage);
@@ -79,7 +79,7 @@ public class Main extends ApplicationAdapter {
 
     private void volverAlMenu() {
         estadoActual = Estado.INICIO;
-        prota = new Personaje(100, 1650, 1f);
+        prota = new Personaje(100, 1650);
         cargarEntidadesNivel();
 
         //menuNiveles.reset();
@@ -145,31 +145,31 @@ public class Main extends ApplicationAdapter {
 
         boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.D)|| Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.A)|| Gdx.input.isKeyPressed(Input.Keys.LEFT);
+        boolean arriba = Gdx.input.isKeyPressed(Input.Keys.UP) || controllers.isArriba();
+        boolean abajo = Gdx.input.isKeyPressed(Input.Keys.DOWN) || controllers.isAbajo();
         boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
         boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.W);
 
-        boolean arriba = Gdx.input.isKeyPressed(Input.Keys.UP);
-        boolean abajo = Gdx.input.isKeyPressed(Input.Keys.DOWN);
-
+        // Movimiento Horizontal
         if (avanzar) {
-            velocidad.x = 500;
+            velocidad.x = 500 * prota.getEscalaProfundidad();
         } else if (retroceder) {
-            velocidad.x = -500;
+            velocidad.x = -500 * prota.getEscalaProfundidad();
         } else {
             velocidad.x = 0;
         }
 
+        // Movimiento Vertical (Profundidad)
+        if (arriba) {
+            velocidad.y = 500 * prota.getEscalaProfundidad();
+        } else if (abajo) {
+            velocidad.y = -500 * prota.getEscalaProfundidad();
+        } else {
+            velocidad.y = 0;
+        }
+
         if (saltar) {
             prota.jump();
-        }
-        if (prota.enZonaLibre&&!prota.isJumping) {
-            if (arriba) {
-                velocidad.y = 500;
-            } else if (abajo) {
-                velocidad.y = -500;
-            } else {
-                velocidad.y = 0;
-            }
         }
         if (atacar) {
             prota.attack();

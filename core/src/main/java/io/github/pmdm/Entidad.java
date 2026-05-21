@@ -13,11 +13,20 @@ import com.badlogic.gdx.utils.Array;
 public abstract class Entidad {
     protected Sprite sprite;
     protected Vector2 position, velocidad;
-    private float alturaZ = 0;
+    protected float alturaZ = 0;
+    protected boolean visible = true;
     protected float stateTime;
     protected Rectangle bounds;
     protected boolean facingRight = true;
     protected ObjectMap<String, Animation<TextureRegion>> animations;
+    protected float renderScale = 1f;
+
+    protected static final Escala DEPTH_SCALER =
+        new Escala(
+            0.82f,
+            1.08f,
+            2000f
+        );
 
     public float getAlturaZ() {
         return alturaZ;
@@ -99,6 +108,8 @@ public abstract class Entidad {
     }
 
     public void draw(SpriteBatch batch) {
+        if (!visible) return;
+
         Animation<TextureRegion> anim = animations.get(estadoActual.name(), animations.get("IDLE"));
         TextureRegion currentFrame = anim.getKeyFrame(stateTime);
 
@@ -110,7 +121,7 @@ public abstract class Entidad {
         float anchoFinal = currentFrame.getRegionWidth()*escala;
         float altoFinal = currentFrame.getRegionHeight()*escala;
 
-        batch.draw(currentFrame, position.x - anchoFinal/2f, position.y + alturaZ, anchoFinal, altoFinal);
+        batch.draw(currentFrame, position.x - anchoFinal/2f, position.y + alturaZ, anchoFinal* (facingRight ? 1 : -1), altoFinal);
 
     }
 

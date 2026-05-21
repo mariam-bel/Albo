@@ -1,7 +1,9 @@
 package io.github.pmdm;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 public class Prop extends Entidad {
@@ -13,17 +15,16 @@ public class Prop extends Entidad {
         this.texture = texture;
         this.width = width;
         this.height = height;
+
+        TextureRegion region = new TextureRegion(texture);
+        Animation<TextureRegion> animStatic = new Animation<>(0.1f, region);
+        animations.put("IDLE", animStatic); this.estadoActual = Estado.IDLE;
+
     }
 
     @Override
     public void update(float delta) {
-        // Los props suelen ser estáticos, pero aquí podrías añadir
-        // una pequeña oscilación si fuera un estandarte o fuego.
+
     }
 
-    @Override
-    public void draw(SpriteBatch batch) {
-        // Implementaremos el escalado dinámico aquí más adelante
-        batch.draw(texture, position.x, position.y, width, height);
-    }
 }

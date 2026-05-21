@@ -86,7 +86,7 @@ public class Controllers {
             }
         });
 
-        Image btnArriba = new Image(new Texture("T_S_Up_Alt.png"));
+        Image btnArriba = new Image(new Texture("T_S_Down_Alt.png"));
         btnArriba.setSize(50,50);
         btnArriba.addListener(new InputListener(){
             @Override
@@ -100,7 +100,7 @@ public class Controllers {
             }
         });
 
-        Image btnAbajo = new Image(new Texture("T_S_Down_Alt.png"));
+        Image btnAbajo = new Image(new Texture("T_S_Up_Alt.png"));
         btnAbajo.setSize(50,50);
         btnAbajo.addListener(new InputListener(){
             @Override

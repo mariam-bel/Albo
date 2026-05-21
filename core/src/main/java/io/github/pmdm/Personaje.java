@@ -15,27 +15,21 @@ public class Personaje extends Entidad {
     private Animation<TextureRegion> walkAnimation, jumpAnimation, attackAnimation, attack2Animation, idleAnimation, hurtAnimation, deadAnimation;
     private Texture protaImg;
     private Sprite protaSprite;
-    public Vector2 position, velocidad;
-    private float stateTime, gravedad;
+    private float gravedad;
+    protected float velocidadZ;
     private final float FRAME_DURATION = 0.1f;
     boolean suelo, isJumping;
-
     enum Estado {IDLE, WALK, JUMP, ATTACK, HURT, DEAD}
     private Estado estadoActual;
     private Estado estadoAnterior;
-
     private boolean isAttacking = false;
     private boolean isDead = false;
     private boolean isHurt = false;
     float attackTimer = 0;
-    Rectangle bounds;
     private Rectangle hurtBox, attackBox;
-    boolean facingRight = true;
     boolean enZonaLibre;
-
     int saltos = 0;
     int numSaltos = 2;
-
     private float hurtTimer = 0;
     private final float HURT_DURATION = FRAME_DURATION * 8;
     private int vidas = 3;
@@ -44,7 +38,7 @@ public class Personaje extends Entidad {
     private float invulnerableTimer = 0f;
     private final float INVULNERABLE_DURATION = 1.5f;
     public Personaje(float inicioX, float inicioY) {
-        super( 10, 0.2f);
+        super( inicioX, inicioY);
 
         position = new Vector2(inicioX, inicioY);
         velocidad = new Vector2();
@@ -138,17 +132,20 @@ public class Personaje extends Entidad {
         stateTime += delta;
 
         if (!isDead) {
-            this.enZonaLibre = false;
-            for (Plataformas p : plataformasOriginales) {
-                if (p.isLibre() && bounds.overlaps(p.getBounds())) {
-                    this.enZonaLibre = true;
-                    break;
+            if (!suelo) {
+                velocidadZ = gravedad * delta;
+                alturaZ += velocidadZ * delta;
+
+                if (alturaZ <= 0) {
+                    alturaZ = 0;
+                    velocidadZ = 0;
+                    suelo = true;
+                    saltos = 0;
+                    isJumping = false;
                 }
             }
 
-            if (!enZonaLibre || !suelo) {
-                velocidad.y -= gravedad * delta;
-            }
+            this.enZonaLibre = false;
 
             position.x += velocidad.x * delta;
             bounds.setPosition(position.x, position.y);
@@ -168,7 +165,7 @@ public class Personaje extends Entidad {
                 }
             }
 
-            position.x = MathUtils.clamp(position.x, 0, Gdx.graphics.getWidth() - protaSprite.getWidth() + 50);
+            position.x = MathUtils.clamp(position.x, 0, 2500);
             bounds.setPosition(position.x, position.y);
 
             float yAnterior = position.y;
@@ -216,7 +213,7 @@ public class Personaje extends Entidad {
                 suelo = true;
                 saltos = 0;
             }
-            position.y = MathUtils.clamp(position.y, 0, Gdx.graphics.getHeight() - protaSprite.getHeight() + 20);
+            position.y = MathUtils.clamp(position.y, 0, 2000);
             bounds.setPosition(position.x, position.y);
 
             if (velocidad.x > 0) facingRight = true;
@@ -260,8 +257,8 @@ public class Personaje extends Entidad {
             protaSprite.setRegion(currentFrame);
             protaSprite.setFlip(!facingRight, false);
 
-            if (!facingRight) protaSprite.setPosition(position.x - 25, position.y - 15);
-            else protaSprite.setPosition(position.x - 35, position.y - 15);
+            if (!facingRight) protaSprite.setPosition(position.x - 25, position.y - 15 + alturaZ);
+            else protaSprite.setPosition(position.x - 35, position.y - 15 + alturaZ);
 
             hurtBox.setPosition(position.x, position.y);
 
@@ -277,9 +274,9 @@ public class Personaje extends Entidad {
     public void draw(SpriteBatch batch) {
 
         if (isInvulnerable) {
-            if ((int)(invulnerableTimer * 10) % 2 == 0) {
-                return;
-            }
+            this.visible = ((int) (invulnerableTimer * 10) % 2 == 0);
+        } else {
+            this.visible = true;
         }
 
         protaSprite.draw(batch);
