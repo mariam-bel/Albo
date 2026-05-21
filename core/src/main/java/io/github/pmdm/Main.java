@@ -76,24 +76,42 @@ public class Main extends ApplicationAdapter {
 
         switch (nivelActivo){
             case 1:
-                prota.setPosition(100,1650);
+                prota.setPosition(400,1000);
 
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.FANTASMA, 1750, 1200, Mob.Comportamiento.PATRULLA, 560,600));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.FANTASMA, 1750, 1200, Mob.Comportamiento.PATRULLA, 560,600));
                 //mobs.add(MobFactory.crearMob(MobFactory.TipoMob.HONGO, 550, 1200, Mob.Comportamiento.ESTATICO, 550,550));
 
-
+                //Árbol
+                plataformas.add(new Plataformas(0, 0, 290, 1800, false, false));
+                plataformas.add(new Plataformas(300, 750, 50, 245, false, false));
+                plataformas.add(new Plataformas(300, 750, 150, 155, false, false));
+                //Suelo izquierda
+                plataformas.add(new Plataformas(300, 980, 400, 5, false, true));
+                plataformas.add(new Plataformas(400, 850, 125, 80, false, true));
+                plataformas.add(new Plataformas(435, 700, 305, 75, false, true));
+                plataformas.add(new Plataformas(450, 570, 50, 150, false, true));
+                plataformas.add(new Plataformas(380, 500, 90, 75, false, true));
+                plataformas.add(new Plataformas(300, 475, 90, 25, false, true));
+                plataformas.add(new Plataformas(395, 350, 75, 80, false, true));
+                plataformas.add(new Plataformas(450, 250, 150, 90, false, true));
+                //Tejados izquierda
+                plataformas.add(new Plataformas(290, 1200, 75, 50, false, true));
+                plataformas.add(new Plataformas(290, 1250, 50, 50, false, true));
+                plataformas.add(new Plataformas(290, 1250, 50, 50, false, true));
+                plataformas.add(new Plataformas(290, 1300, 155, 50, false, true));
+                plataformas.add(new Plataformas(295, 1350, 155, 75, false, true));
+                plataformas.add(new Plataformas(340, 1425, 170, 50, false, true));
+                //Siguiente
                 plataformas.add(new Plataformas(2340, 1, 70, 100 , false, false));
                 plataformas.add(new Plataformas(2200, 1, 175, 60 , false, true));
                 plataformas.add(new Plataformas(1500, 300, 30, 100, true, true));
                 plataformas.add(new Plataformas(1535, 545, 50, 60, true, true));
                 plataformas.add(new Plataformas(1510, 790, 50, 90, true, false));
-                plataformas.add(new Plataformas(0, 0, 300, 740, false, true));
-                plataformas.add(new Plataformas(300, 200, 280, 300, false, true));
                 plataformas.add(new Plataformas(600, 200, 1400, 90, false, true));
                 plataformas.add(new Plataformas(1820, 500, 1500, 100, false, true));
                 plataformas.add(new Plataformas(1875, 600, 100, 38, true, true));
@@ -234,22 +252,19 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(camara.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        // 1. Dibujar hitboxes de las plataformas (Verde)
         shapeRenderer.setColor(0, 1, 0, 1);
         for (Plataformas p : plataformas) {
             shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
         }
 
-        // 2. Dibujar hitboxes del protagonista y su ataque
         if (!prota.shouldRemove()) {
-            shapeRenderer.setColor(0, 1, 0, 1); // Cuerpo en verde
+            shapeRenderer.setColor(0, 1, 0, 1);
             shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
 
-            shapeRenderer.setColor(1, 0, 0, 1); // Rango de ataque en rojo
+            shapeRenderer.setColor(1, 0, 0, 1);
             shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
         }
 
-        // 3. Dibujar hitboxes de los mobs (Azul)
         shapeRenderer.setColor(0, 0, 1, 1);
         for (Mob m : mobs){
             if (!m.shouldRemove()) {
