@@ -42,6 +42,7 @@ public class Personaje extends Entidad {
 
         position = new Vector2(inicioX, inicioY);
         velocidad = new Vector2();
+        feetOffsetY = 15f;
 
         hurtBox = new Rectangle(inicioX, inicioY, 120, 140);
         attackBox = new Rectangle();

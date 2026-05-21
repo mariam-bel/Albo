@@ -20,6 +20,7 @@ public abstract class Entidad {
     protected boolean facingRight = true;
     protected ObjectMap<String, Animation<TextureRegion>> animations;
     protected float renderScale = 1f;
+    protected float feetOffsetY = 0f;
 
     protected static final Escala DEPTH_SCALER =
         new Escala(
@@ -108,27 +109,35 @@ public abstract class Entidad {
     }
 
     public void draw(SpriteBatch batch) {
+
         if (!visible) return;
 
         Animation<TextureRegion> anim = animations.get(estadoActual.name(), animations.get("IDLE"));
+
+        if (anim == null) return;
+
         TextureRegion currentFrame = anim.getKeyFrame(stateTime);
 
-        sprite.setRegion(currentFrame);
-        sprite.setFlip(!facingRight, false);
-        sprite.setPosition(position.x, position.y - sprite.getHeight()/2);
+        renderScale = DEPTH_SCALER.getScale(position.y);
 
-        float escala = getEscalaProfundidad();
-        float anchoFinal = currentFrame.getRegionWidth()*escala;
-        float altoFinal = currentFrame.getRegionHeight()*escala;
+        float width = currentFrame.getRegionWidth() * renderScale;
 
-        batch.draw(currentFrame, position.x - anchoFinal/2f, position.y + alturaZ, anchoFinal* (facingRight ? 1 : -1), altoFinal);
+        float height = currentFrame.getRegionHeight() * renderScale;
 
+        batch.draw(currentFrame,position.x - width / 2f,position.y - (feetOffsetY * renderScale) + alturaZ, width, height);
     }
-
     public abstract void update(float delta);
 
     public Rectangle getBounds() { return bounds; }
     public Vector2 getPosition() { return position; }
+    public float getYSortPosition() {
+
+        if (bounds == null) {
+            return position.y;
+        }
+
+        return bounds.y;
+    }
     public void dispose() {
     }
 }

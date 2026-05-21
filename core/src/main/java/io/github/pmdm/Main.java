@@ -30,6 +30,7 @@ public class Main extends ApplicationAdapter {
     private Texture background;
     private Texture textureArbol, textureFlor, textureArbol2, textureEscaleras, texturePiedra, texturePuesto, textureGato;
     private Array<Entidad> entidadesRender = new Array<>();
+    private RenderSystem renderSystem;
     private Personaje prota;
     private Controllers controllers;
     private OrthographicCamera camara;
@@ -63,6 +64,7 @@ public class Main extends ApplicationAdapter {
         mobs = new Array<>();
         propsNivel = new Array<>();
         plataformas = new Array<>();
+        renderSystem = new RenderSystem();
         cargarEntidadesNivel();
 
         // CORRECCIÓN 2: Crear al prota ANTES de cargar las entidades del nivel
@@ -152,18 +154,18 @@ public class Main extends ApplicationAdapter {
 
         // Movimiento Horizontal
         if (avanzar) {
-            velocidad.x = 500 * prota.getEscalaProfundidad();
+            velocidad.x = 500;
         } else if (retroceder) {
-            velocidad.x = -500 * prota.getEscalaProfundidad();
+            velocidad.x = -500;
         } else {
             velocidad.x = 0;
         }
 
         // Movimiento Vertical (Profundidad)
         if (arriba) {
-            velocidad.y = 500 * prota.getEscalaProfundidad();
+            velocidad.y = 500;
         } else if (abajo) {
-            velocidad.y = -500 * prota.getEscalaProfundidad();
+            velocidad.y = -500;
         } else {
             velocidad.y = 0;
         }
@@ -177,7 +179,6 @@ public class Main extends ApplicationAdapter {
 
         prota.setVelocidad(velocidad);
     }
-
     public void checkAttack() {
         for (Mob m : mobs) {
             if (prota.isAttacking()) {
@@ -248,75 +249,128 @@ public class Main extends ApplicationAdapter {
     }
 
     private void dibujarJuego() {
+
         batch.setProjectionMatrix(camara.combined);
+
         batch.begin();
 
-        // Fondo --> Cambiar el texture según nivelActivo
+        // =================================================
+        // FONDO
+        // =================================================
+
         batch.draw(background, 0, 0, 2500, 2000);
+
+        // =================================================
+        // COLA DE RENDER
+        // =================================================
 
         entidadesRender.clear();
 
-        // ORDENAMOS LAS ENTIDADES
-        if (!prota.shouldRemove()) entidadesRender.add(prota);
-        for (Mob m : mobs) if (!m.shouldRemove()) entidadesRender.add(m);
-        entidadesRender.addAll(propsNivel);
+        // PLAYER
+        if (!prota.shouldRemove()) {
+            entidadesRender.add(prota);
+        }
 
-        // MAYOR Y = MÁS AL FONDO
-        entidadesRender.sort((e1, e2) -> Float.compare(e2.getPosition().y, e1.getPosition().y));
-
-
-        boolean arbolDibujado = false;
-        boolean arbol2Dibujado = false;
-        boolean floresDibujadas = false;
-        boolean puestoDibujado = false;
-        boolean piedraDibujada = false;
-        boolean escalerasDibujadas = false;
-
-        if (nivelActivo == 1) {
-            for (Entidad e : entidadesRender) {
-                e.draw(batch);
+        // MOBS
+        for (Mob m : mobs) {
+            if (!m.shouldRemove()) {
+                entidadesRender.add(m);
             }
         }
 
-        for (Plataformas p : plataformas) p.draw(batch);
-        for (Mob m: mobs) if (!m.shouldRemove()) m.draw(batch);
-        if (!prota.shouldRemove()) prota.draw(batch);
+        // PROPS
+        entidadesRender.addAll(propsNivel);
+
+        // =================================================
+        // Y SORT PROFESIONAL
+        // =================================================
+
+        renderSystem.render(batch, entidadesRender);
+
+        // =================================================
+        // PLATAFORMAS DEBUG
+        // =================================================
+
+        for (Plataformas p : plataformas) {
+            p.draw(batch);
+        }
 
         batch.end();
 
+        // =================================================
+        // DEBUG HITBOXES
+        // =================================================
+
         shapeRenderer.setProjectionMatrix(camara.combined);
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        // 1. Dibujar hitboxes de las plataformas (Verde)
+        // Plataformas
         shapeRenderer.setColor(0, 1, 0, 1);
+
         for (Plataformas p : plataformas) {
-            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+
+            shapeRenderer.rect(
+                p.getBounds().x,
+                p.getBounds().y,
+                p.getBounds().width,
+                p.getBounds().height
+            );
         }
 
-        // 2. Dibujar hitboxes del protagonista y su ataque
+        // Player
         if (!prota.shouldRemove()) {
-            shapeRenderer.setColor(0, 1, 0, 1); // Cuerpo en verde
-            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
 
-            shapeRenderer.setColor(1, 0, 0, 1); // Rango de ataque en rojo
-            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+            shapeRenderer.setColor(0, 1, 0, 1);
+
+            shapeRenderer.rect(
+                prota.getBounds().x,
+                prota.getBounds().y,
+                prota.getBounds().width,
+                prota.getBounds().height
+            );
+
+            shapeRenderer.setColor(1, 0, 0, 1);
+
+            shapeRenderer.rect(
+                prota.getAttackBox().x,
+                prota.getAttackBox().y,
+                prota.getAttackBox().width,
+                prota.getAttackBox().height
+            );
         }
 
-        // 3. Dibujar hitboxes de los mobs (Azul)
+        // Mobs
         shapeRenderer.setColor(0, 0, 1, 1);
-        for (Mob m : mobs){
+
+        for (Mob m : mobs) {
+
             if (!m.shouldRemove()) {
-                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
-                if(m.isAttacking()) {
-                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
+
+                shapeRenderer.rect(
+                    m.getBounds().x,
+                    m.getBounds().y,
+                    m.getBounds().width,
+                    m.getBounds().height
+                );
+
+                if (m.isAttacking()) {
+
+                    shapeRenderer.rect(
+                        m.getAttackBox().x,
+                        m.getAttackBox().y,
+                        m.getAttackBox().width,
+                        m.getAttackBox().height
+                    );
                 }
             }
         }
+
         shapeRenderer.end();
 
         controllers.draw();
-
     }
+
     private void cargarFondoNivel(int nivel) {
         if (background != null) background.dispose();
         if (textureArbol != null) textureArbol.dispose();
@@ -512,14 +566,31 @@ public class Main extends ApplicationAdapter {
     }
 
     private void actualizarCamara() {
-        /*
-        camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
-        camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
 
-        camara.position.x = MathUtils.clamp(camara.position.x, camara.viewportWidth/2, 2500 - camara.viewportWidth/2);
-        camara.position.y = MathUtils.clamp(camara.position.y, camara.viewportHeight/2, 2000 - camara.viewportHeight/2);
-        */
-        camara.position.set(2500/2f, 2000/2f, 0);
+        float smooth = 4f;
+
+        camara.position.x +=
+            (prota.getPosition().x - camara.position.x)
+                * smooth
+                * Gdx.graphics.getDeltaTime();
+
+        camara.position.y +=
+            (prota.getPosition().y - camara.position.y)
+                * smooth
+                * Gdx.graphics.getDeltaTime();
+
+        camara.position.x = MathUtils.clamp(
+            camara.position.x,
+            camara.viewportWidth / 2f,
+            2500 - camara.viewportWidth / 2f
+        );
+
+        camara.position.y = MathUtils.clamp(
+            camara.position.y,
+            camara.viewportHeight / 2f,
+            2000 - camara.viewportHeight / 2f
+        );
+
         camara.update();
     }
 

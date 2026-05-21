@@ -64,6 +64,7 @@ public class Mob extends Entidad {
         this.facingRight = false;
         this.vida=vidas;
         terrestre = terricola;
+        feetOffsetY = 50f;
 
         // Configuración de las animaciones estándar de los Mobs
         animations.put("IDLE", crearAnimacion(sheet, filaIdle, framesIdle, cols, filas, 0.1f, Animation.PlayMode.LOOP));
@@ -81,7 +82,7 @@ public class Mob extends Entidad {
         }else if (Objects.equals(path, "slimeBasicV2-Sheet.png")) {
             height=50;
         }
-        this.bounds = new Rectangle(sprite.getX(), sprite.getY(), 50, height);
+        this.bounds = new Rectangle(x + 75, y + 50, 50, height);
     }
     private Array<TextureRegion> getFrames(TextureRegion[][] regions, int fila, int cantidad) {
         Array<TextureRegion> frames = new Array<>();
