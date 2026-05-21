@@ -67,7 +67,7 @@ public class Personaje extends Entidad {
         jumpAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 4, 4,6), Animation.PlayMode.NORMAL);
         // ATTACK (fila 3)
         //attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 3, 3,7), Animation.PlayMode.NORMAL);
-       // ATTACK 2 (filas 9 y 10)
+        // ATTACK 2 (filas 9 y 10)
         attackAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 9, 10,10), Animation.PlayMode.NORMAL);
         // HURT (fila 7)
         hurtAnimation = new Animation<>(FRAME_DURATION, getFrames(regions, 7,7, 4), Animation.PlayMode.LOOP);

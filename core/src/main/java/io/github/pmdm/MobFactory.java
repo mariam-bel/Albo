@@ -17,7 +17,7 @@ public class MobFactory {
             case SLIME:
                 return new Mob(x, y, comp, min, max,"slimeBasicV2-Sheet.png", 12, 7, 0,10, 5,2,1,10, 3,12, 6,9, 1, true);
             case FANTASMA:
-                return new Mob(x, y, comp, min, max,"fantasma.png", 6, 6, 0,6, 4,5,1,6, 2,6, 5,4, 1,false);
+                return new Mob(x, y, comp, min, max,"nivel_1/fantasma.png", 6, 6, 0,6, 4,5,1,6, 2,6, 5,4, 1,false);
             case HONGO:
                 return new Mob(x, y, comp, min, max,"hongo.png", 8, 7, 0,8, 4,5,1,7, 2,8, 5,8, 3, true);
             default:

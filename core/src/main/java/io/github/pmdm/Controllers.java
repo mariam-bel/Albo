@@ -19,6 +19,8 @@ public class Controllers {
     Stage stage;
     private boolean avanzar;
     private boolean retroceder;
+    private boolean arriba;
+    private boolean abajo;
     private boolean atacar;
     private boolean saltar;
     OrthographicCamera camera;
@@ -74,13 +76,41 @@ public class Controllers {
         tableDerecha.setFillParent(true);
         tableDerecha.right().bottom();
 
-        Image btnSaltar = new Image(new Texture("T_S_Down_Alt.png"));
+        Image btnSaltar = new Image(new Texture("T_S_Square_Alt.png"));
         btnSaltar.setSize(50,50);
         btnSaltar.addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 setSaltar(true);
                 return true;
+            }
+        });
+
+        Image btnArriba = new Image(new Texture("T_S_Up_Alt.png"));
+        btnArriba.setSize(50,50);
+        btnArriba.addListener(new InputListener(){
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                setArriba(true);
+                return true;
+            }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                setArriba(false);
+            }
+        });
+
+        Image btnAbajo = new Image(new Texture("T_S_Down_Alt.png"));
+        btnAbajo.setSize(50,50);
+        btnAbajo.addListener(new InputListener(){
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                setAbajo(true);
+                return true;
+            }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                setAbajo(false);
             }
         });
 
@@ -140,10 +170,12 @@ public class Controllers {
         });
 
         tableIzquierda.add();
-        tableIzquierda.row().pad(5,5,5,5);
-        tableIzquierda.add(btnRetroceder).size(btnRetroceder.getWidth(), btnRetroceder.getHeight());
+        tableIzquierda.add(btnArriba).size(50, 50);
         tableIzquierda.add();
-        tableIzquierda.add(btnAvanzar).size(btnAvanzar.getWidth(), btnAvanzar.getHeight());
+        tableIzquierda.row().pad(5,5,5,5);
+        tableIzquierda.add(btnRetroceder).size(50, 50);
+        tableIzquierda.add(btnAbajo).size(50, 50);
+        tableIzquierda.add(btnAvanzar).size(50, 50);
         stage.addActor(tableIzquierda);
 
         tableDerecha.add();
@@ -191,6 +223,10 @@ public class Controllers {
         return false;
     }
     public void setSaltar(boolean saltar) { this.saltar = saltar; }
+    public boolean isArriba() { return arriba; }
+    public void setArriba(boolean arriba) { this.arriba = arriba; }
+    public boolean isAbajo() { return abajo; }
+    public void setAbajo(boolean abajo) { this.abajo = abajo; }
     public void resize(int width, int height) { viewport.update(width, height, true); }
     public boolean isAtacar() { return atacar; }
     public void setAtacar(boolean atacar) { this.atacar = atacar; }

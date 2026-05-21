@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -15,8 +16,18 @@ public abstract class Entidad {
     protected Vector2 position, velocidad;
     protected float stateTime;
     protected Rectangle bounds;
+    protected float alturaZ = 0; // Altura real (salto)
+    protected boolean visible = true;
     protected boolean facingRight = true;
     protected ObjectMap<String, Animation<TextureRegion>> animations;
+
+    public float getEscalaProfundidad() {
+        float maxY = 2000;
+        float minScale = 0.5f;
+        float maxScale = 1.2f;
+        float escala = minScale + (maxScale - minScale) * (1 - (position.y / maxY));
+        return MathUtils.clamp(escala, minScale, maxScale);
+    }
 
     public enum Estado { IDLE, WALK, JUMP, ATTACK, HURT, DEAD }
     protected Estado estadoActual = Estado.IDLE;
@@ -69,13 +80,22 @@ public abstract class Entidad {
     }
 
     public void draw(SpriteBatch batch) {
+        if (!visible) return;
+
         Animation<TextureRegion> anim = animations.get(estadoActual.name(), animations.get("IDLE"));
+        if (anim == null) return;
         TextureRegion currentFrame = anim.getKeyFrame(stateTime);
 
-        sprite.setRegion(currentFrame);
-        sprite.setFlip(!facingRight, false);
-        sprite.setPosition(position.x, position.y);
-        sprite.draw(batch);
+        float escala = getEscalaProfundidad();
+        float anchoFinal = currentFrame.getRegionWidth() * escala;
+        float altoFinal = currentFrame.getRegionHeight() * escala;
+
+        // Dibujamos usando position.y para la profundidad y alturaZ para el salto
+        batch.draw(currentFrame,
+            position.x - anchoFinal / 2f,
+            position.y + alturaZ,
+            anchoFinal * (facingRight ? 1 : -1),
+            altoFinal);
     }
 
     public abstract void update(float delta);
