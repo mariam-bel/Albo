@@ -233,11 +233,10 @@ public class Main extends ApplicationAdapter {
                 break;
 
             case NIVEL_COMPLETADO:
-                // Reiniciamos la matriz para que se dibuje en coordenadas de pantalla, no de mundo
                 batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 batch.begin();
-                float winW = Gdx.graphics.getWidth() * 0.7f; // 70% del ancho de la pantalla
-                float winH = (winW / textureWin.getWidth()) * textureWin.getHeight(); // Mantener proporción
+                float winW = Gdx.graphics.getWidth() * 0.7f;
+                float winH = (winW / textureWin.getWidth()) * textureWin.getHeight();
                 batch.draw(textureWin, (Gdx.graphics.getWidth() - winW) / 2f, (Gdx.graphics.getHeight() - winH) / 2f, winW, winH);
                 batch.end();
                 if (Gdx.input.justTouched()) {
@@ -333,12 +332,12 @@ public class Main extends ApplicationAdapter {
 
     }
     private void cargarFondoNivel(int nivel) {
-        if (background != null) background.dispose(); // Liberar memoria del fondo anterior
+        if (background != null) background.dispose();
 
         if (nivel == 1) {
             background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
         } else if (nivel == 2) {
-            background = new Texture(Gdx.files.internal("fondoOpt2.jpeg")); // O el que corresponda
+            background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
         }
     }
 
