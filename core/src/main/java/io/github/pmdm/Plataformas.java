@@ -46,8 +46,6 @@ public class Plataformas {
     }
 
     public void dispose() {
-        if (texture != null) {
-            texture.dispose();
-        }
+        texture.dispose();
     }
 }

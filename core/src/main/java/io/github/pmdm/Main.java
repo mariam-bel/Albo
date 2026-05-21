@@ -45,7 +45,7 @@ public class Main extends ApplicationAdapter {
         menu = new Menu();
         //menuNiveles = new Levels();
 
-        background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
+        background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
 
         camara = new OrthographicCamera();
         camara.setToOrtho(false, 1000, 480);
@@ -138,8 +138,8 @@ public class Main extends ApplicationAdapter {
         boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
         boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.W);
 
-        boolean arriba = Gdx.input.isKeyPressed(Input.Keys.UP);
-        boolean abajo = Gdx.input.isKeyPressed(Input.Keys.DOWN);
+        boolean arriba = Gdx.input.isKeyPressed(Input.Keys.UP) || controllers.isArriba();
+        boolean abajo = Gdx.input.isKeyPressed(Input.Keys.DOWN) || controllers.isAbajo();
 
         if (avanzar) {
             velocidad.x = 500;
@@ -283,7 +283,7 @@ public class Main extends ApplicationAdapter {
         if (background != null) background.dispose(); // Liberar memoria del fondo anterior
 
         if (nivel == 1) {
-            background = new Texture(Gdx.files.internal("nivel-1.png"));
+            background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
         } else if (nivel == 2) {
             background = new Texture(Gdx.files.internal("fondoOpt2.jpeg")); // O el que corresponda
         }
@@ -422,28 +422,28 @@ public class Main extends ApplicationAdapter {
         }
         batch.end();
 
-            shapeRenderer.setProjectionMatrix(camara.combined);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-            shapeRenderer.setColor(0, 1, 0, 1);
-            for (Plataformas p : plataformas) {
-                shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
-            }
-            if (!prota.shouldRemove()) {
-                shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
+        shapeRenderer.setProjectionMatrix(camara.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(0, 1, 0, 1);
+        for (Plataformas p : plataformas) {
+            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+        }
+        if (!prota.shouldRemove()) {
+            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
 
-                shapeRenderer.setColor(1, 0, 0, 1);
-                shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
-            }
-            shapeRenderer.setColor(0, 0, 1, 1);
-            for (Mob m: mobs){
-                if (!m.shouldRemove()) {
-                    shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
-                    if(m.isAttacking()) {
-                        shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
-                    }
+            shapeRenderer.setColor(1, 0, 0, 1);
+            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+        }
+        shapeRenderer.setColor(0, 0, 1, 1);
+        for (Mob m: mobs){
+            if (!m.shouldRemove()) {
+                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+                if(m.isAttacking()) {
+                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
                 }
             }
-            shapeRenderer.end();
+        }
+        shapeRenderer.end();
 
         controllers.stage.act(deltaTime);
         controllers.update(deltaTime);
