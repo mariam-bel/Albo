@@ -88,17 +88,20 @@ public class Main extends ApplicationAdapter {
 
                 //Árbol
                 plataformas.add(new Plataformas(0, 0, 290, 1800, false, false));
-                plataformas.add(new Plataformas(300, 750, 50, 245, false, false));
+                plataformas.add(new Plataformas(300, 750, 50, 240, false, false));
                 plataformas.add(new Plataformas(300, 750, 150, 155, false, false));
                 //Suelo izquierda
                 plataformas.add(new Plataformas(300, 980, 400, 5, false, true));
-                plataformas.add(new Plataformas(400, 850, 125, 80, false, true));
+                plataformas.add(new Plataformas(300, 850, 225, 80, false, true));
                 plataformas.add(new Plataformas(435, 700, 305, 75, false, true));
                 plataformas.add(new Plataformas(450, 570, 50, 150, false, true));
+                plataformas.add(new Plataformas(480, 615, 50, 150, false, true));
                 plataformas.add(new Plataformas(380, 500, 90, 75, false, true));
                 plataformas.add(new Plataformas(300, 475, 90, 25, false, true));
                 plataformas.add(new Plataformas(395, 350, 75, 80, false, true));
-                plataformas.add(new Plataformas(450, 250, 150, 90, false, true));
+                plataformas.add(new Plataformas(450, 250, 350, 90, false, true));
+                plataformas.add(new Plataformas(450, 0, 350, 250, false, false));
+                plataformas.add(new Plataformas(0, 255, 450, 1, false, false));
                 //Tejados izquierda
                 plataformas.add(new Plataformas(290, 1200, 75, 50, false, true));
                 plataformas.add(new Plataformas(290, 1250, 50, 50, false, true));
@@ -106,13 +109,28 @@ public class Main extends ApplicationAdapter {
                 plataformas.add(new Plataformas(290, 1300, 155, 50, false, true));
                 plataformas.add(new Plataformas(295, 1350, 155, 75, false, true));
                 plataformas.add(new Plataformas(340, 1425, 170, 50, false, true));
-                //Siguiente
+                //Centro
+                plataformas.add(new Plataformas(800, 0, 350, 200, false, true));
+                plataformas.add(new Plataformas(950, 200, 250, 100, false, true));
+                plataformas.add(new Plataformas(1000, 300, 350, 100, false, true));
+                plataformas.add(new Plataformas(950, 400, 250, 100, false, true));
+                plataformas.add(new Plataformas(800, 470, 175, 100, false, true));
+                plataformas.add(new Plataformas(700, 525, 100, 75, false, true));
+                plataformas.add(new Plataformas(870, 525, 50, 175, false, true));
+
+
+
+
+
+
+
+
+
                 plataformas.add(new Plataformas(2340, 1, 70, 100 , false, false));
                 plataformas.add(new Plataformas(2200, 1, 175, 60 , false, true));
                 plataformas.add(new Plataformas(1500, 300, 30, 100, true, true));
                 plataformas.add(new Plataformas(1535, 545, 50, 60, true, true));
                 plataformas.add(new Plataformas(1510, 790, 50, 90, true, false));
-                plataformas.add(new Plataformas(600, 200, 1400, 90, false, true));
                 plataformas.add(new Plataformas(1820, 500, 1500, 100, false, true));
                 plataformas.add(new Plataformas(1875, 600, 100, 38, true, true));
                 plataformas.add(new Plataformas(0, 0, 2500, 1, false, true));
