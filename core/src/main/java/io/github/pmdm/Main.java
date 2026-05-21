@@ -15,8 +15,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.Comparator;
-
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
 
@@ -28,26 +26,18 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     public static SpriteBatch batch;
     private Texture background;
-    private Texture textureArbol, textureFlor, textureArbol2, textureEscaleras, texturePiedra, texturePuesto, textureGato;
-    private Array<Entidad> entidadesRender = new Array<>();
-    private RenderSystem renderSystem;
     private Personaje prota;
     private Controllers controllers;
     private OrthographicCamera camara;
     private World world;
     private Array<Plataformas> plataformas;
     private Array<Mob> mobs;
-    private Array<Prop> propsNivel;
     private boolean golpeRealizado = false;
-    private final Comparator<Entidad> ySortComparator = new Comparator<Entidad>() {
-        @Override
-        public int compare(Entidad e1, Entidad e2) {
-            return Float.compare(e2.getPosition().y, e1.getPosition().y);
-        }
-    };
+
 
     @Override
     public void create() {
+
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         world = new World(new Vector2(0,-10), true);
@@ -55,25 +45,17 @@ public class Main extends ApplicationAdapter {
         menu = new Menu();
         //menuNiveles = new Levels();
 
-        // CORRECCIÓN 1: Usar nivel-1.png que sí existe
-        background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
+        background = new Texture(Gdx.files.internal("fondoOpt2.jpeg"));
 
         camara = new OrthographicCamera();
-        camara.setToOrtho(false, 2500, 2000);
+        camara.setToOrtho(false, 1000, 480);
 
         mobs = new Array<>();
-        propsNivel = new Array<>();
         plataformas = new Array<>();
-        renderSystem = new RenderSystem();
         cargarEntidadesNivel();
 
-        // CORRECCIÓN 2: Crear al prota ANTES de cargar las entidades del nivel
         controllers = new Controllers();
         prota = new Personaje(100, 1650);
-
-        nivelActivo = 1;
-        cargarFondoNivel(nivelActivo);
-        cargarEntidadesNivel();
 
         Gdx.input.setInputProcessor(menu.stage);
 
@@ -90,44 +72,50 @@ public class Main extends ApplicationAdapter {
 
     private void cargarEntidadesNivel() {
         mobs.clear();
-        propsNivel.clear();
         plataformas.clear();
 
         switch (nivelActivo){
             case 1:
-                prota.setPosition(100,1650);
+                prota.setPosition(400,1000);
 
-                /*
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
-                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.FANTASMA, 1750, 1200, Mob.Comportamiento.PATRULLA, 560,600));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
+//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.FANTASMA, 1750, 1200, Mob.Comportamiento.PATRULLA, 560,600));
                 //mobs.add(MobFactory.crearMob(MobFactory.TipoMob.HONGO, 550, 1200, Mob.Comportamiento.ESTATICO, 550,550));
-                */
 
-
+                //Árbol
+                plataformas.add(new Plataformas(0, 0, 290, 1800, false, false));
+                plataformas.add(new Plataformas(300, 750, 50, 245, false, false));
+                plataformas.add(new Plataformas(300, 750, 150, 155, false, false));
+                //Suelo izquierda
+                plataformas.add(new Plataformas(300, 980, 400, 5, false, true));
+                plataformas.add(new Plataformas(400, 850, 125, 80, false, true));
+                plataformas.add(new Plataformas(435, 700, 305, 75, false, true));
+                plataformas.add(new Plataformas(450, 570, 50, 150, false, true));
+                plataformas.add(new Plataformas(380, 500, 90, 75, false, true));
+                plataformas.add(new Plataformas(300, 475, 90, 25, false, true));
+                plataformas.add(new Plataformas(395, 350, 75, 80, false, true));
+                plataformas.add(new Plataformas(450, 250, 150, 90, false, true));
+                //Tejados izquierda
+                plataformas.add(new Plataformas(290, 1200, 75, 50, false, true));
+                plataformas.add(new Plataformas(290, 1250, 50, 50, false, true));
+                plataformas.add(new Plataformas(290, 1250, 50, 50, false, true));
+                plataformas.add(new Plataformas(290, 1300, 155, 50, false, true));
+                plataformas.add(new Plataformas(295, 1350, 155, 75, false, true));
+                plataformas.add(new Plataformas(340, 1425, 170, 50, false, true));
+                //Siguiente
                 plataformas.add(new Plataformas(2340, 1, 70, 100 , false, false));
                 plataformas.add(new Plataformas(2200, 1, 175, 60 , false, true));
                 plataformas.add(new Plataformas(1500, 300, 30, 100, true, true));
                 plataformas.add(new Plataformas(1535, 545, 50, 60, true, true));
                 plataformas.add(new Plataformas(1510, 790, 50, 90, true, false));
-                plataformas.add(new Plataformas(0, 0, 300, 740, false, true));
-                plataformas.add(new Plataformas(300, 200, 280, 300, false, true));
                 plataformas.add(new Plataformas(600, 200, 1400, 90, false, true));
                 plataformas.add(new Plataformas(1820, 500, 1500, 100, false, true));
                 plataformas.add(new Plataformas(1875, 600, 100, 38, true, true));
                 plataformas.add(new Plataformas(0, 0, 2500, 1, false, true));
-
-
-                propsNivel.add(new Prop(textureArbol, 950, 350, 1300, 1900));
-                propsNivel.add(new Prop(textureArbol2, -15, 700, 700, 1400));
-                propsNivel.add(new Prop(textureFlor, 1400, 190, 500, 1000));
-                propsNivel.add(new Prop(texturePuesto, 960, 450, 250, 390));
-                propsNivel.add(new Prop(textureEscaleras, 300, -85, 690, 1000));
-                propsNivel.add(new Prop(textureGato, 1200, 1650, 100, 100));
-
                 break;
             case 2:
                 //Aquí añadimos los bloques y mobs que irán en el nivel 2
@@ -147,12 +135,12 @@ public class Main extends ApplicationAdapter {
 
         boolean avanzar = controllers.isAvanzar() || Gdx.input.isKeyPressed(Input.Keys.D)|| Gdx.input.isKeyPressed(Input.Keys.RIGHT);
         boolean retroceder = controllers.isRetroceder() || Gdx.input.isKeyPressed(Input.Keys.A)|| Gdx.input.isKeyPressed(Input.Keys.LEFT);
-        boolean arriba = Gdx.input.isKeyPressed(Input.Keys.UP) || controllers.isArriba();
-        boolean abajo = Gdx.input.isKeyPressed(Input.Keys.DOWN) || controllers.isAbajo();
         boolean saltar = controllers.isSaltar() || Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
         boolean atacar = controllers.isAtacar() || Gdx.input.isKeyJustPressed(Input.Keys.W);
 
-        // Movimiento Horizontal
+        boolean arriba = Gdx.input.isKeyPressed(Input.Keys.UP);
+        boolean abajo = Gdx.input.isKeyPressed(Input.Keys.DOWN);
+
         if (avanzar) {
             velocidad.x = 500;
         } else if (retroceder) {
@@ -160,18 +148,17 @@ public class Main extends ApplicationAdapter {
         } else {
             velocidad.x = 0;
         }
-
-        // Movimiento Vertical (Profundidad)
-        if (arriba) {
-            velocidad.y = 500;
-        } else if (abajo) {
-            velocidad.y = -500;
-        } else {
-            velocidad.y = 0;
-        }
-
         if (saltar) {
             prota.jump();
+        }
+        if (prota.enZonaLibre&&!prota.isJumping) {
+            if (arriba) {
+                velocidad.y = 500;
+            } else if (abajo) {
+                velocidad.y = -500;
+            } else {
+                velocidad.y = 0;
+            }
         }
         if (atacar) {
             prota.attack();
@@ -179,6 +166,7 @@ public class Main extends ApplicationAdapter {
 
         prota.setVelocidad(velocidad);
     }
+
     public void checkAttack() {
         for (Mob m : mobs) {
             if (prota.isAttacking()) {
@@ -249,158 +237,55 @@ public class Main extends ApplicationAdapter {
     }
 
     private void dibujarJuego() {
-
         batch.setProjectionMatrix(camara.combined);
-
         batch.begin();
 
-        // =================================================
-        // FONDO
-        // =================================================
-
+        // Fondo --> Cambiar el texture según nivelActivo
         batch.draw(background, 0, 0, 2500, 2000);
 
-        // =================================================
-        // COLA DE RENDER
-        // =================================================
-
-        entidadesRender.clear();
-
-        // PLAYER
-        if (!prota.shouldRemove()) {
-            entidadesRender.add(prota);
-        }
-
-        // MOBS
-        for (Mob m : mobs) {
-            if (!m.shouldRemove()) {
-                entidadesRender.add(m);
-            }
-        }
-
-        // PROPS
-        entidadesRender.addAll(propsNivel);
-
-        // =================================================
-        // Y SORT PROFESIONAL
-        // =================================================
-
-        renderSystem.render(batch, entidadesRender);
-
-        // =================================================
-        // PLATAFORMAS DEBUG
-        // =================================================
-
-        for (Plataformas p : plataformas) {
-            p.draw(batch);
-        }
+        for (Plataformas p : plataformas) p.draw(batch);
+        for (Mob m: mobs) if (!m.shouldRemove()) m.draw(batch);
+        if (!prota.shouldRemove()) prota.draw(batch);
 
         batch.end();
 
-        // =================================================
-        // DEBUG HITBOXES
-        // =================================================
-
         shapeRenderer.setProjectionMatrix(camara.combined);
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        // Plataformas
         shapeRenderer.setColor(0, 1, 0, 1);
-
         for (Plataformas p : plataformas) {
-
-            shapeRenderer.rect(
-                p.getBounds().x,
-                p.getBounds().y,
-                p.getBounds().width,
-                p.getBounds().height
-            );
+            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
         }
 
-        // Player
         if (!prota.shouldRemove()) {
-
             shapeRenderer.setColor(0, 1, 0, 1);
-
-            shapeRenderer.rect(
-                prota.getBounds().x,
-                prota.getBounds().y,
-                prota.getBounds().width,
-                prota.getBounds().height
-            );
+            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
 
             shapeRenderer.setColor(1, 0, 0, 1);
-
-            shapeRenderer.rect(
-                prota.getAttackBox().x,
-                prota.getAttackBox().y,
-                prota.getAttackBox().width,
-                prota.getAttackBox().height
-            );
+            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
         }
 
-        // Mobs
         shapeRenderer.setColor(0, 0, 1, 1);
-
-        for (Mob m : mobs) {
-
+        for (Mob m : mobs){
             if (!m.shouldRemove()) {
-
-                shapeRenderer.rect(
-                    m.getBounds().x,
-                    m.getBounds().y,
-                    m.getBounds().width,
-                    m.getBounds().height
-                );
-
-                if (m.isAttacking()) {
-
-                    shapeRenderer.rect(
-                        m.getAttackBox().x,
-                        m.getAttackBox().y,
-                        m.getAttackBox().width,
-                        m.getAttackBox().height
-                    );
+                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+                if(m.isAttacking()) {
+                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
                 }
             }
         }
-
         shapeRenderer.end();
 
         controllers.draw();
+
     }
-
     private void cargarFondoNivel(int nivel) {
-        if (background != null) background.dispose();
-        if (textureArbol != null) textureArbol.dispose();
-        if (textureFlor != null) textureFlor.dispose();
-        if (textureArbol2 != null) textureArbol2.dispose();
-        if (textureEscaleras != null) textureEscaleras.dispose();
-        //if (texturePiedra != null) texturePiedra.dispose();
-        if (texturePuesto != null) texturePuesto.dispose();
-        if (textureGato != null) textureGato.dispose();
-
-        textureArbol = null;
-        textureFlor = null;
-        textureArbol2 = null;
-        textureEscaleras = null;
-        //texturePiedra = null;
-        texturePuesto = null;
-        textureGato = null;
+        if (background != null) background.dispose(); // Liberar memoria del fondo anterior
 
         if (nivel == 1) {
-            background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
-            textureArbol = new Texture(Gdx.files.internal("nivel_1/arbol1-nivel-1.png"));
-            textureFlor = new Texture(Gdx.files.internal("nivel_1/flor.png"));
-            textureArbol2 = new Texture(Gdx.files.internal("nivel_1/arbol2-nivel-1.png"));
-            textureEscaleras = new Texture(Gdx.files.internal("nivel_1/escaleras.png"));
-            //texturePiedra = new Texture(Gdx.files.internal("nivel_1/piedra.png"));
-            texturePuesto = new Texture(Gdx.files.internal("nivel_1/puesto.png"));
-            textureGato = new Texture(Gdx.files.internal("nivel_1/el-gato.png"));
+            background = new Texture(Gdx.files.internal("nivel-1.png"));
         } else if (nivel == 2) {
-            // CAMBIO: Aquí también he puesto nivel-1.png para que no falle el nivel 2
-            background = new Texture(Gdx.files.internal("nivel_1/nivel-1.png"));
+            background = new Texture(Gdx.files.internal("fondoOpt2.jpeg")); // O el que corresponda
         }
     }
 
@@ -566,45 +451,18 @@ public class Main extends ApplicationAdapter {
     }
 
     private void actualizarCamara() {
+        camara.position.x += (prota.getPosition().x - camara.position.x) * 0.1f;
+        camara.position.y += (prota.getPosition().y - camara.position.y) * 0.1f;
 
-        float smooth = 4f;
-
-        camara.position.x +=
-            (prota.getPosition().x - camara.position.x)
-                * smooth
-                * Gdx.graphics.getDeltaTime();
-
-        camara.position.y +=
-            (prota.getPosition().y - camara.position.y)
-                * smooth
-                * Gdx.graphics.getDeltaTime();
-
-        camara.position.x = MathUtils.clamp(
-            camara.position.x,
-            camara.viewportWidth / 2f,
-            2500 - camara.viewportWidth / 2f
-        );
-
-        camara.position.y = MathUtils.clamp(
-            camara.position.y,
-            camara.viewportHeight / 2f,
-            2000 - camara.viewportHeight / 2f
-        );
-
+        camara.position.x = MathUtils.clamp(camara.position.x, camara.viewportWidth/2, 2500 - camara.viewportWidth/2);
+        camara.position.y = MathUtils.clamp(camara.position.y, camara.viewportHeight/2, 2000 - camara.viewportHeight/2);
         camara.update();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        if (background != null) background.dispose();
-        if (textureArbol != null) textureArbol.dispose();
-        if (textureFlor != null) textureFlor.dispose();
-        if (textureArbol2 != null) textureArbol2.dispose();
-        if (textureEscaleras != null) textureEscaleras.dispose();
-        //if (texturePiedra != null) texturePiedra.dispose();
-        if (texturePuesto != null) texturePuesto.dispose();
-        if (textureGato != null) textureGato.dispose();
+        background.dispose();
         shapeRenderer.dispose();
         menu.dispose();
         //menuNiveles.dispose();
