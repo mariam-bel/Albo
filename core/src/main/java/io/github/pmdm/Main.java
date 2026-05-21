@@ -3,6 +3,8 @@ package io.github.pmdm;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,7 +20,7 @@ import com.badlogic.gdx.utils.Array;
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
 
-    enum Estado { INICIO, JUGANDO, APUESTA, PELEA_MOBS, SELECCION_NIVEL, FIN_JUEGO;}
+    enum Estado { INICIO, JUGANDO, APUESTA, PELEA_MOBS, SELECCION_NIVEL, FIN_JUEGO, NIVEL_COMPLETADO;}
     Estado estadoActual = Estado.INICIO;
     //private Levels menuNiveles;
     private int nivelActivo = -1;
@@ -26,7 +28,9 @@ public class Main extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     public static SpriteBatch batch;
     private Rectangle gatoHitbox;
-    private Texture background, textureGato;
+    private Texture background, textureGato, textureWin, textureGameOver;
+    private Music musicaAmbiente;
+    private Sound sonidoAtaque, sonidoDanio, sonidoVictoria, sonidoSalto;
 
     private Personaje prota;
     private Controllers controllers;
@@ -58,6 +62,21 @@ public class Main extends ApplicationAdapter {
 
         controllers = new Controllers();
         prota = new Personaje(100, 1650);
+
+        // Pantallas de fin
+        textureWin = new Texture(Gdx.files.internal("level-completed-S.png"));
+        textureGameOver = new Texture(Gdx.files.internal("game-over.png")); // Añadir el png si lo tienes
+
+        // Audio
+        musicaAmbiente = Gdx.audio.newMusic(Gdx.files.internal("Clement Panchout _ The Sicko Gecko.mp3"));
+        musicaAmbiente.setLooping(true);
+        musicaAmbiente.setVolume(0.5f);
+        musicaAmbiente.play();
+
+        sonidoAtaque = Gdx.audio.newSound(Gdx.files.internal("hurt.mp3"));
+        sonidoDanio = Gdx.audio.newSound(Gdx.files.internal("hurt.mp3"));
+        sonidoVictoria = Gdx.audio.newSound(Gdx.files.internal("coin.mp3"));
+        sonidoSalto = Gdx.audio.newSound(Gdx.files.internal("jump.mp3"));
 
         Gdx.input.setInputProcessor(menu.stage);
 
@@ -153,6 +172,7 @@ public class Main extends ApplicationAdapter {
         }
         if (saltar) {
             prota.jump();
+            sonidoSalto.play();
         }
         if (prota.enZonaLibre&&!prota.isJumping) {
             if (arriba) {
@@ -165,6 +185,7 @@ public class Main extends ApplicationAdapter {
         }
         if (atacar) {
             prota.attack();
+            sonidoAtaque.play();
         }
 
         prota.setVelocidad(velocidad);
@@ -209,6 +230,33 @@ public class Main extends ApplicationAdapter {
             case JUGANDO:
                 actualizarLogicaJuego();
                 dibujarJuego();
+                break;
+
+            case NIVEL_COMPLETADO:
+                // Reiniciamos la matriz para que se dibuje en coordenadas de pantalla, no de mundo
+                batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+                batch.begin();
+                float winW = Gdx.graphics.getWidth() * 0.7f; // 70% del ancho de la pantalla
+                float winH = (winW / textureWin.getWidth()) * textureWin.getHeight(); // Mantener proporción
+                batch.draw(textureWin, (Gdx.graphics.getWidth() - winW) / 2f, (Gdx.graphics.getHeight() - winH) / 2f, winW, winH);
+                batch.end();
+                if (Gdx.input.justTouched()) {
+                    volverAlMenu();
+                }
+                break;
+
+            case FIN_JUEGO:
+                if (textureGameOver != null) {
+                    batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+                    batch.begin();
+                    float goW = Gdx.graphics.getWidth() * 0.7f;
+                    float goH = (goW / textureGameOver.getWidth()) * textureGameOver.getHeight();
+                    batch.draw(textureGameOver, (Gdx.graphics.getWidth() - goW) / 2f, (Gdx.graphics.getHeight() - goH) / 2f, goW, goH);
+                    batch.end();
+                }
+                if (Gdx.input.justTouched()) {
+                    volverAlMenu();
+                }
                 break;
                 /*case INICIO:
                 menu.draw();
@@ -312,17 +360,22 @@ public class Main extends ApplicationAdapter {
         }
 
         if (gatoHitbox != null && prota.getBounds().overlaps(gatoHitbox)) {
-            nivelActivo = 2;
-            cargarFondoNivel(nivelActivo);
-            cargarEntidadesNivel();
+            estadoActual = Estado.NIVEL_COMPLETADO;
+            sonidoVictoria.play();
+            Gdx.input.setInputProcessor(null);
         }
 
         for (Mob m: mobs){
             if (m.isAttacking() && m.getAttackBox().overlaps(prota.getBounds())) {
                 if (!prota.isHurt() && !prota.isDead()) {
                     prota.quitarVida(1);
+                    sonidoDanio.play();
                     controllers.actualizarVidas(prota.getVidas());
-                    if (prota.getVidas() <= 0) prota.setDead(true);
+                    if (prota.getVidas() <= 0) {
+                        prota.setDead(true);
+                        estadoActual = Estado.FIN_JUEGO;
+                        Gdx.input.setInputProcessor(null);
+                    }
                 }
             }
         }
@@ -504,6 +557,13 @@ public class Main extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         background.dispose();
+        if (textureWin != null) textureWin.dispose();
+        if (textureGameOver != null) textureGameOver.dispose();
+        if (musicaAmbiente != null) musicaAmbiente.dispose();
+        if (sonidoAtaque != null) sonidoAtaque.dispose();
+        if (sonidoDanio != null) sonidoDanio.dispose();
+        if (sonidoVictoria != null) sonidoVictoria.dispose();
+        if (sonidoSalto != null) sonidoSalto.dispose();
         shapeRenderer.dispose();
         menu.dispose();
         //menuNiveles.dispose();
