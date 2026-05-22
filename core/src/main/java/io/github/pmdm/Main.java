@@ -81,12 +81,11 @@ public class Main extends ApplicationAdapter {
                 prota.setPosition(400,1000);
                 gatoHitbox = new Rectangle(450, 1500, 100, 100);
 
-//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 20, Mob.Comportamiento.PATRULLA, 600,1000));
-//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 1200, Mob.Comportamiento.PERSECUCION, 0,0));
-//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 500, 50, Mob.Comportamiento.PERSECUCION,0,0));
-//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
-//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 1750, 1200, Mob.Comportamiento.PATRULLA, 1750,2280));
-//                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.FANTASMA, 1750, 1200, Mob.Comportamiento.PATRULLA, 560,600));
+                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SKELETON, 600, 990, Mob.Comportamiento.PATRULLA, 300,500));
+                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.RAT, 550, 355, Mob.Comportamiento.PATRULLA,550,650));
+                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 550, 1200, Mob.Comportamiento.PATRULLA, 550,700));
+                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.SLIME, 795, 955, Mob.Comportamiento.PATRULLA, 800,850));
+                mobs.add(MobFactory.crearMob(MobFactory.TipoMob.FANTASMA, 1130, 865, Mob.Comportamiento.PATRULLA, 1130,1200));
                 //mobs.add(MobFactory.crearMob(MobFactory.TipoMob.HONGO, 550, 1200, Mob.Comportamiento.ESTATICO, 550,550));
 
                 //Árbol
@@ -94,7 +93,7 @@ public class Main extends ApplicationAdapter {
                 plataformas.add(new Plataformas(300, 750, 50, 240, false, false));
                 plataformas.add(new Plataformas(300, 750, 150, 155, false, false));
                 //Suelo izquierda
-                plataformas.add(new Plataformas(300, 980, 400, 5, false, true));
+                plataformas.add(new Plataformas(300, 980, 400, 10, false, true));
                 plataformas.add(new Plataformas(300, 850, 225, 80, false, true));
                 plataformas.add(new Plataformas(435, 700, 305, 75, false, true));
                 plataformas.add(new Plataformas(450, 570, 50, 150, false, true));
@@ -114,7 +113,7 @@ public class Main extends ApplicationAdapter {
                 plataformas.add(new Plataformas(340, 1425, 170, 50, false, true));
                 //Centro
                 plataformas.add(new Plataformas(800, 0, 350, 200, false, true));
-                plataformas.add(new Plataformas(950, 200, 250, 100, false, true));
+                plataformas.add(new Plataformas(950, 200, 260, 100, false, true));
                 plataformas.add(new Plataformas(1000, 300, 350, 100, false, true));
                 plataformas.add(new Plataformas(950, 400, 250, 100, false, true));
                 plataformas.add(new Plataformas(800, 470, 175, 100, false, true));
@@ -130,24 +129,8 @@ public class Main extends ApplicationAdapter {
                 plataformas.add(new Plataformas(1050, 725, 125, 75, false, true));
                 plataformas.add(new Plataformas(1270, 675, 125, 75, false, true));
                 plataformas.add(new Plataformas(1150, 0, 125, 200, false, false));
-                plataformas.add(new Plataformas(1250, 200, 125, 200, false, false));
-
-
-
-
-
-
-
-
-
-                plataformas.add(new Plataformas(2340, 1, 70, 100 , false, false));
-                plataformas.add(new Plataformas(2200, 1, 175, 60 , false, true));
-                plataformas.add(new Plataformas(1500, 300, 30, 100, true, true));
-                plataformas.add(new Plataformas(1535, 545, 50, 60, true, true));
-                plataformas.add(new Plataformas(1510, 790, 50, 90, true, false));
-                plataformas.add(new Plataformas(1820, 500, 1500, 100, false, true));
-                plataformas.add(new Plataformas(1875, 600, 100, 38, true, true));
-                plataformas.add(new Plataformas(0, 0, 2500, 1, false, true));
+                plataformas.add(new Plataformas(1250, 200, 750, 100, false, false));
+                plataformas.add(new Plataformas(1500, 300, 150, 1200, false, false));
                 break;
             case 2:
                 //Aquí añadimos los bloques y mobs que irán en el nivel 2
@@ -281,33 +264,33 @@ public class Main extends ApplicationAdapter {
             batch.draw(textureGato, gatoHitbox.x, gatoHitbox.y, gatoHitbox.width, gatoHitbox.height);
         }
         batch.end();
-
-        shapeRenderer.setProjectionMatrix(camara.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        shapeRenderer.setColor(0, 1, 0, 1);
-        for (Plataformas p : plataformas) {
-            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
-        }
-
-        if (!prota.shouldRemove()) {
-            shapeRenderer.setColor(0, 1, 0, 1);
-            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
-
-            shapeRenderer.setColor(1, 0, 0, 1);
-            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
-        }
-
-        shapeRenderer.setColor(0, 0, 1, 1);
-        for (Mob m : mobs){
-            if (!m.shouldRemove()) {
-                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
-                if(m.isAttacking()) {
-                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
-                }
-            }
-        }
-        shapeRenderer.end();
+//
+//        shapeRenderer.setProjectionMatrix(camara.combined);
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+//
+//        shapeRenderer.setColor(0, 1, 0, 1);
+//        for (Plataformas p : plataformas) {
+//            shapeRenderer.rect(p.getBounds().x, p.getBounds().y, p.getBounds().width, p.getBounds().height);
+//        }
+//
+//        if (!prota.shouldRemove()) {
+//            shapeRenderer.setColor(0, 1, 0, 1);
+//            shapeRenderer.rect(prota.getBounds().x, prota.getBounds().y, prota.getBounds().width, prota.getBounds().height);
+//
+//            shapeRenderer.setColor(1, 0, 0, 1);
+//            shapeRenderer.rect(prota.getAttackBox().x, prota.getAttackBox().y, prota.getAttackBox().width, prota.getAttackBox().height);
+//        }
+//
+//        shapeRenderer.setColor(0, 0, 1, 1);
+//        for (Mob m : mobs){
+//            if (!m.shouldRemove()) {
+//                shapeRenderer.rect(m.getBounds().x, m.getBounds().y, m.getBounds().width, m.getBounds().height);
+//                if(m.isAttacking()) {
+//                    shapeRenderer.rect(m.getAttackBox().x, m.getAttackBox().y, m.getAttackBox().width, m.getAttackBox().height);
+//                }
+//            }
+//        }
+//        shapeRenderer.end();
 
         controllers.draw();
 
