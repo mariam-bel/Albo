@@ -2,6 +2,7 @@ package io.github.pmdm;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -54,6 +55,8 @@ public class Mob extends Entidad {
     private int vida;
     private boolean terrestre;
 
+    private float hurtTimer = 0f;
+
     public Mob(float x, float y, Comportamiento tipo, float minX, float maxX, String path, int cols, int filas, int filaIdle, int framesIdle, int filaHurt, int framesHurt, int filaWalk, int framesWalk, int filaAttack, int framesAttack, int filaDead, int framesDead, int vidas, boolean terricola) {
         super(x, y);
         this.sheet = new Texture(path);
@@ -68,20 +71,29 @@ public class Mob extends Entidad {
         // Configuración de las animaciones estándar de los Mobs
         animations.put("IDLE", crearAnimacion(sheet, filaIdle, framesIdle, cols, filas, 0.1f, Animation.PlayMode.LOOP));
         animations.put("WALK", crearAnimacion(sheet, filaWalk, framesWalk, cols, filas, 0.1f, Animation.PlayMode.LOOP));
-        animations.put("HURT", crearAnimacion(sheet, filaWalk, framesWalk, cols, filas, 0.1f, Animation.PlayMode.LOOP));
+        animations.put("HURT", crearAnimacion(sheet, filaHurt, framesHurt, cols, filas, 0.1f, Animation.PlayMode.NORMAL));
         animations.put("ATTACK", crearAnimacion(sheet, filaAttack, framesAttack, cols, filas, 0.1f, Animation.PlayMode.NORMAL));
         animations.put("DEAD", crearAnimacion(sheet, filaDead, framesDead, cols, filas, 0.1f, Animation.PlayMode.NORMAL));
 
         this.sprite.setSize(200, 200);
-        float height=0;
-        if (Objects.equals(path, "skeletonBaseOutlineV2-Sheet.png")) {
-            height = 100;
-        } else if (Objects.equals(path, "ratBaseV2-Sheet.png")) {
-            height = 100;
-        }else if (Objects.equals(path, "slimeBasicV2-Sheet.png")) {
-            height=50;
+        this.sprite.setPosition(x,y);
+        float height;
+        switch (path) {
+            case "skeletonBaseV2-Sheet.png":
+            case "skeletonBaseOutlineV2-Sheet.png":
+                height = 100; break;
+            case "ratBaseV2-Sheet.png":
+                height = 60; break;
+            case "slimeBasicV2-Sheet.png":
+                height = 50; break;
+            case "nivel_1/fantasma.png":
+                height = 100; break;
+            case "hongo.png":
+                height = 80; break;
+            default:
+                height = 80; break;
         }
-        this.bounds = new Rectangle(sprite.getX(), sprite.getY(), 50, height);
+        this.bounds = new Rectangle(x, y, 50, height);
     }
     private Array<TextureRegion> getFrames(TextureRegion[][] regions, int fila, int cantidad) {
         Array<TextureRegion> frames = new Array<>();
@@ -94,6 +106,7 @@ public class Mob extends Entidad {
 
         stateTime += delta;
 
+
         if (isDead) {
             estadoActual = Estado.DEAD;
             velocityV.set(0,0);
@@ -103,9 +116,20 @@ public class Mob extends Entidad {
             }
 
             sprite.setRegion(animations.get("DEAD").getKeyFrame(stateTime));
-            sprite.setPosition(position.x, position.y);
+            sprite.setSize(200, 200);
+            sprite.setPosition(position.x, position.y );
             return;
         }
+        if (hurtTimer > 0) {
+            hurtTimer -= delta;
+            estadoActual = Estado.HURT;
+            velocityV.x = 0;
+            sprite.setRegion(animations.get("HURT").getKeyFrame(stateTime));
+            sprite.setSize(200, 200);
+            sprite.setPosition(position.x , position.y );
+            return;
+        }
+
 
         if (!isAttacking) {
             if (comportamiento == Comportamiento.PERSECUCION) {
@@ -162,24 +186,32 @@ public class Mob extends Entidad {
 
 
         position.x += velocityV.x * delta;
-        bounds.setPosition(position.x + 75, position.y+50);
+        bounds.setPosition(position.x , position.y );
         for (Rectangle rect : superficies) {
             if (bounds.overlaps(rect)) {
-                if (velocityV.x > 0) position.x = rect.x - bounds.width - 75;
-                else if (velocityV.x < 0) position.x = rect.x + rect.width - 75;
+                if (velocityV.x > 0) position.x = rect.x - bounds.width;
+                else if (velocityV.x < 0) position.x = rect.x + rect.width;
+                bounds.setPosition(position.x , position.y );
                 if(comportamiento == Comportamiento.PATRULLA) facingRight = !facingRight;
             }
         }
-        boolean grounded = false;
 
         position.y += velocityV.y * delta;
-        bounds.setPosition(position.x + 75, position.y+50);
+        bounds.setPosition(position.x , position.y );
+
+        boolean grounded = false;
         for (Rectangle rect : superficies) {
             if (bounds.overlaps(rect)) {
                 if (velocityV.y < 0) {
-                    position.y = rect.y+ rect.height-50;
+                    position.y = rect.y+ rect.height;
                     velocityV.y = 0;
                     grounded=true;
+                    bounds.setPosition(position.x , position.y );
+
+                }else if (velocityV.y > 0) {
+                    position.y = rect.y - bounds.height;
+                    velocityV.y = 0;
+                    bounds.setPosition(position.x , position.y );
                 }
             }
         }
@@ -188,12 +220,13 @@ public class Mob extends Entidad {
                 velocityV.y -= 1000f * delta;
             }
         } else {
-            velocityV.y = 0; // Se mantiene flotando si es estático y no queremos gravedad
+            velocityV.y = 0;
         }
 
         sprite.setPosition(position.x, position.y);
+        bounds.setPosition(position.x , position.y );
         sprite.setRegion(animations.get(estadoActual.name()).getKeyFrame(stateTime));
-        sprite.setFlip(!facingRight, false);
+        sprite.setSize(200, 200);
     }
     public void setComportamiento(Comportamiento c) { this.comportamiento = c; }
     public int getVidas() { return vidas; }
@@ -213,6 +246,20 @@ public class Mob extends Entidad {
     }
 
     @Override public void update(float delta) {}
+    @Override
+    public void draw(SpriteBatch batch) {
+        TextureRegion region = new TextureRegion(sprite);
+        float x = position.x - (200 - bounds.width) / 2f;
+        float y = position.y - (200 - bounds.height)/2f;
+        float width = 200;
+        float height = 200;
+
+        if (!facingRight) {
+            batch.draw(region, x + width, y, -width, height);
+        } else {
+            batch.draw(region, x, y, width, height);
+        }
+    }
     public Rectangle getAttackBox() { return attackBox; }
     public void setDead(boolean dead) { this.isDead = dead; }
     public boolean isDead() { return isDead; }
@@ -227,6 +274,9 @@ public class Mob extends Entidad {
 
         if (vida <= 0) {
             isDead = true;
+            stateTime = 0;
+        }else {
+            hurtTimer = 0.4f;
             stateTime = 0;
         }
         estadoActual = Estado.HURT;
